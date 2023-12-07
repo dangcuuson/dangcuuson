@@ -1,0 +1,17 @@
+{
+    "name": "dcs-web",
+    "version": "1.0.0",
+    "scripts": {
+        "start": "webpack serve --hot -c ../dcs-webpack/webpack.dev.js",
+        "test": "echo TEST"
+    },
+    "dependencies": {
+        "@mui/material": "5.14.20",
+        "react": "18.2.0",
+        "react-dom": "18.2.0"
+    },
+    "devDependencies": {
+        "@types/react": "18.2.42",
+        "@types/react-dom": "18.2.17"
+    }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "dangcuuson",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/dcs-web", "packages/dcs-webpack"
+  ],
+  "repository": "git@github.com:dangcuuson/dangcuuson.git",
+  "author": "dangcuuson@gmail.com",
+  "license": "MIT",
+  "scripts": {
+    "reset-modules": "rm -rf node_modules/ packages/*/node_modules",
+    "test-all": "lerna run test --stream --scope dcs-web"
+  },
+  "devDependencies": {
+    "lerna": "8.0.0",
+    "typescript": "5.3.3"
+  }
+}

@@ -1,0 +1,35 @@
+// base tsconfig for all packages
+{
+    "compilerOptions": {
+      "allowJs": true,
+      // module need to be "esnext" for code splitting to work
+      // https://davidea.st/articles/webpack-typescript-code-split-wont-work
+      "module": "CommonJS",
+      "esModuleInterop": true,
+      "target": "es6",
+      "lib": [
+        "es6",
+        "dom",
+        "es2016.array.include",
+        "esnext.asynciterable"
+      ],
+      "jsx": "react",
+      "moduleResolution": "node",
+      "forceConsistentCasingInFileNames": true,
+      // noEmit since we only use tsc for type checking, js files will be output from webpack
+      "noEmit": true,
+      "noImplicitReturns": true,
+      "noImplicitThis": true,
+      "noImplicitAny": false,
+      "strictNullChecks": true,
+      // "strictFunctionTypes": true,
+      // "strictPropertyInitialization": true,
+      // "suppressImplicitAnyIndexErrors": true,
+      "noUnusedLocals": true,
+      "skipLibCheck": true,
+      "sourceMap": true
+    },
+    "files": [
+      "./types.ts"
+    ]
+  }
