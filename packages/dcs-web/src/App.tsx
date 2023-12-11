@@ -2,7 +2,7 @@ import React from 'react';
 import SudokuPad from './components/SudokuPad/SudokuPad';
 
 const App: React.FC<{}> = () => {
-    
+
     return (
         <React.Fragment>
             {/* <SudokuPad grid={[
@@ -30,7 +30,7 @@ const App: React.FC<{}> = () => {
             {/**
              * From https://www.youtube.com/watch?v=BPMNu5-Pv24&list=PLK-l8O0YikOk20gPW9Fk_vQ72HiLnk-b4
              */}
-             <SudokuPad grid={[
+            {/* <SudokuPad grid={[
                 [7,5,0,0,1,0,0,0,0],
                 [0,0,4,0,9,5,0,6,0],
                 [0,0,0,8,0,7,0,0,4],
@@ -40,6 +40,17 @@ const App: React.FC<{}> = () => {
                 [0,0,0,4,0,6,0,0,0],
                 [0,7,0,9,5,0,4,0,0],
                 [0,0,0,0,0,0,0,2,6]
+            ]} /> */}
+            <SudokuPad grid={[
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0]
             ]} />
         </React.Fragment>
     );

@@ -1,7 +1,11 @@
 import * as _ from 'lodash';
+import { CellHighlight, PencilMark, SolveStep, SudokuGrid } from './SudokuPadTypes';
 
-export type SudokuGrid = number[][];
-export type PencilMark = { row: number; col: number, box: number; candidates: number[] };
+class MultipleSolutionsFoundError extends Error {
+    constructor(public solutions: SudokuGrid[]) {
+        super('Found more than one solution in the provided grid');
+    }
+}
 
 const calcBoxIndex = (row: number, col: number): number => {
     return Math.floor(row / 3) * 3 + Math.floor(col / 3);
@@ -51,32 +55,16 @@ function buildPencilMarks(grid: SudokuGrid): PencilMark[] {
     return pMarks;
 }
 
-export type CellHighlight = {
-    row: number;
-    col: number;
-    color: string;
-    pMark?: PencilMarkHighlight[];
-}
-type PencilMarkHighlight = {
-    value: number;
-    type: 'circle' | 'cross';
-}
-export type SolveStep = {
-    grid: SudokuGrid;
-    pMarks: PencilMark[];
-    comment: string;
-    highlights?: CellHighlight[];
-}
 const RED = '#ef9a9a';
 const GREEN = '#c5e1a5';
 type SolveOptions = {
     showSteps?: boolean;
 }
 type SolveResult = {
-    // Most sudoku problem should have only one solution but this function do not rely on that
-    // Empty array for not finding solution
-    solutions: SudokuGrid[];
+    solution?: SudokuGrid;
     steps: SolveStep[];
+    // in case a puzzle has more than one solution, it will output at least two examples here
+    multipleSolutions?: SudokuGrid[];
 }
 
 /**
@@ -85,7 +73,44 @@ type SolveResult = {
  * 
  * Only resort to brute force when all techniques are exhausted
  */
-export function solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
+function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
+    // if checkCompletion=true, test that all value is filled
+    // otherwise, just check to makre sure no duplicate and number values should be between 0-9
+    const isGridValid = (grid: SudokuGrid, checkCompletion: boolean) => {
+        // scan value in each row, col, box
+        for (let i = 0; i < 9; i++) {
+            const rowValues = grid[i];
+            const colValues = grid.map(row => row[i]);
+
+            const bRow = Math.floor(i / 3) * 3;
+            const bCol = (i % 3) * 3;
+            const boxValues = [
+                grid[bRow][bCol], grid[bRow][bCol + 1], grid[bRow][bCol + 2],
+                grid[bRow + 1][bCol], grid[bRow + 1][bCol + 1], grid[bRow + 1][bCol + 2],
+                grid[bRow + 2][bCol], grid[bRow + 2][bCol + 1], grid[bRow + 2][bCol + 2],
+            ];
+
+            const valuesSets = [rowValues, colValues, boxValues];
+            const allSetOk = valuesSets.every(numSet => {
+                if (checkCompletion) {
+                    return numSet.length === 9 && _.difference(_1To9, numSet).length === 0;
+                } else {
+                    const non0Values = numSet.filter(v => v !== 0);
+                    const uniqNon0Val = _.uniq(non0Values);
+                    return non0Values.every(v => v > 0 && v < 10) && non0Values.length === uniqNon0Val.length;
+                }
+            });
+            if (!allSetOk) {
+                return false;
+            }
+        }
+        return true;
+    }
+    if (!isGridValid(_grid, false)) {
+        return { steps: [] }
+    }
+
+
     // copy grid/pencil mark to a new memory space so that further grid modification does not change old value
     function copyGrid(oldGrid: SudokuGrid) {
         return _.cloneDeep(oldGrid);
@@ -588,7 +613,41 @@ export function solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResul
             return false;
         }
 
-        
+        function bifurcation(): boolean {
+            const testPMark = _.minBy(pMarks, pMark => pMark.candidates.length);
+            if (testPMark) {
+                const solutionsFound: SudokuGrid[] = [];
+                // try filling the grid with one the candidate
+                for (const value of testPMark.candidates) {
+                    const testGrid = copyGrid(grid);
+                    testGrid[testPMark.row][testPMark.col] = value;
+                    const result = _solve(testGrid, { showSteps: false });
+                    if (result.multipleSolutions) {
+                        throw new MultipleSolutionsFoundError(result.multipleSolutions);
+                    } else if (!result.solution) {
+                        addStep({
+                            grid,
+                            pMarks,
+                            comment:
+                                `Using bifurcation, putting ${value} in row ${testPMark.row + 1}, column ${testPMark.col + 1} lead to an invalid solution.`,
+                            highlights: [{ col: testPMark.col, row: testPMark.row, color: RED }]
+                        })
+                        testPMark.candidates = testPMark.candidates.filter(v => v !== value);
+                        return true;
+                    } else {
+                        // found more than 1 valid solution => stop
+                        solutionsFound.push(result.solution);
+                        if (solutionsFound.length >= 2) {
+                            throw new MultipleSolutionsFoundError(solutionsFound);
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+
         let updated = false;
         do {
             const techniques = [
@@ -597,7 +656,8 @@ export function solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResul
                 nakedGroups,
                 hiddenTwins,
                 boxClaim,
-                rowColClaim
+                rowColClaim,
+                bifurcation
             ];
             for (const technique of techniques) {
                 updated = technique();
@@ -609,8 +669,26 @@ export function solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResul
     }
 
     applyTechniques();
+
+    if (!isGridValid(grid, true)) {
+        return { steps };
+    }
+
     return {
-        solutions: [],
+        solution: grid,
         steps
+    }
+}
+
+export function solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
+    try {
+        return _solve(_grid, options);
+    } catch (err) {
+        if (err instanceof MultipleSolutionsFoundError) {
+            return { multipleSolutions: err.solutions, steps: [] }
+        } else {
+            console.error(err);
+            return { steps: [] };
+        }
     }
 }
