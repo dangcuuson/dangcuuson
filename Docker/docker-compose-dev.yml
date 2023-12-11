@@ -15,9 +15,12 @@ services:
     develop:
       watch:
         - action: sync
+          # context dir is where this yml file located. It has no relation to workdiing_dir
+          # Not sure how to set it to watch multiple folder using wildcard
           path: ../packages
           target: /usr/src/app/packages
           ignore:
             - node_modules/
-        - action: rebuild
-          path: package.json
+        # no need as I thikn it's better to rebuild image manually after package installation
+        #- action: rebuild
+        #  path: ../package.json

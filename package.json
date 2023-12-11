@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "packages/dcs-web", "packages/dcs-webpack"
+    "packages/dcs-web",
+    "packages/dcs-webpack"
   ],
   "repository": "git@github.com:dangcuuson/dangcuuson.git",
   "author": "dangcuuson@gmail.com",
@@ -14,6 +15,8 @@
     "docker-build:dev": "docker compose -f ./Docker/docker-compose-dev.yml build"
   },
   "devDependencies": {
+    "@types/jest": "29.5.11",
+    "jest": "29.7.0",
     "lerna": "8.0.0",
     "typescript": "5.3.3"
   }
