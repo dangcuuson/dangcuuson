@@ -10,24 +10,23 @@ const initFabricCanvas = (el: HTMLCanvasElement): fabric.Canvas => {
 }
 
 interface Props {
-    fcRef: React.RefObject<fabric.Canvas>
+    onCanvasReady?: (canvas: HTMLCanvasElement, fabric: fabric.Canvas) => void;
 }
 
-const DrawableCanvas = forwardRef<HTMLCanvasElement, Props>((props, ref) => {
+const DrawableCanvas: React.FC<Props> = ({ onCanvasReady }) => {
     const [fc, setFc] = React.useState<fabric.Canvas | null>(null);
 
     return (
-        <React.Fragment>
-            <canvas width="500" height="500" ref={r => {
-                if (r && !fc) {
-                    const newFC = initFabricCanvas(r);
-                    setFc(newFC);
-                    // ref
-                }
-            }} style={{ border: '1px solid' }}>
-            </canvas>
-        </React.Fragment>
+        <canvas width="50" height="50" ref={r => {
+            if (r && !fc) {
+                const newFC = initFabricCanvas(r);
+                setFc(newFC);
+
+                onCanvasReady?.(r, newFC);
+            }
+        }} style={{ border: '1px solid' }}>
+        </canvas>
     )
-})
+};
 
 export default DrawableCanvas;

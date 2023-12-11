@@ -107,6 +107,7 @@ async function trainModel(model: tf.Sequential, data, onTrainEnd: () => void) {
 const MnistModelTrainer: React.FC<{}> = () => {
     const modelRef = React.useRef<tf.LayersModel>();
     const [traning, setTraining] = React.useState(true);
+    const [canvas, setCanvas] = React.useState<HTMLCanvasElement | null>(null);
     React.useEffect(
         () => {
             tf.loadLayersModel('localstorage://my-model-1')
@@ -140,14 +141,52 @@ const MnistModelTrainer: React.FC<{}> = () => {
             }}>
                 Save model (local storage)
             </button>
+            {!!canvas && (
+                <button
+                    onClick={() => {
+                        const readCanvas = () => {
+                            const ctx = canvas.getContext('2d');
+                            if (!ctx) {
+                                alert(`2d canvas is not supported`);
+                                return null;
+                            }
+                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            const imageBuffer = new Float32Array(canvas.width * canvas.height);
+                            for (let j = 0; j < imageData.data.length / 4; j++) {
+                                // All channels hold an equal value since the image is grayscale, so
+                                // just read the red channel.
+                                imageBuffer[j] = imageData.data[j * 4] / 255;
+                            }
+                            console.log(canvas.width, canvas.height, imageData.data.length);
+                            return { canvas, imageBuffer };
+                        }
 
-            <DrawableCanvas
-                preCanvasRenderer={({ captureCanvas }) => (
-                    <button>
-                        Predict
-                    </button>
-                )}
-            />
+                        const doPrediction = () => {
+                            const canvasResult = readCanvas();
+                            const model = modelRef.current;
+                            if (!canvasResult || !model) {
+                                return;
+                            }
+
+                            const imgTensor = tf
+                                .tensor4d(canvasResult.imageBuffer, [1, canvasResult.canvas.width, canvasResult.canvas.height, 1])
+                            const resizedImg = tf.image.resizeBilinear(imgTensor, [28, 28]);
+                            const preds = model.predict(resizedImg);
+
+                            console.log(preds.toString());
+                        }
+                        doPrediction();
+                    }}
+                >
+                    Predict
+                </button>
+            )}
+            {/* This is needed because React will break with conditional button before DrawableCanvas (which do something with DOM manipulation) */}
+            <div />
+
+            <DrawableCanvas onCanvasReady={(canvas, fc) => {
+                setCanvas(canvas);
+            }} />
         </React.Fragment>
     )
 }
