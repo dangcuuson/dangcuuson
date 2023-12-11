@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "scripts": {
         "start": "webpack serve --hot -c ../dcs-webpack/webpack.dev.js",
+        "start:docker": "docker compose -f ../../Docker/docker-compose-dev.yml watch",
         "test": "echo TEST"
     },
     "dependencies": {

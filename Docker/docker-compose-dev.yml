@@ -1,0 +1,23 @@
+version: '3.4'
+
+services:
+  web:
+    image: dangcuuson
+    working_dir: /usr/src/app/packages/dcs-web
+    command: yarn start
+    ports:
+      - "3000:3000"
+    build:
+      context: ../
+      dockerfile: ./Docker/Dockerfile.dev
+    environment:
+      NODE_ENV: development
+    develop:
+      watch:
+        - action: sync
+          path: ../packages
+          target: /usr/src/app/packages
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json

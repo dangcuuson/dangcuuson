@@ -10,7 +10,8 @@
   "license": "MIT",
   "scripts": {
     "reset-modules": "rm -rf node_modules/ packages/*/node_modules",
-    "test-all": "lerna run test --stream --scope dcs-web"
+    "test-all": "lerna run test --stream --scope dcs-web",
+    "docker-build:dev": "docker compose -f ./Docker/docker-compose-dev.yml build"
   },
   "devDependencies": {
     "lerna": "8.0.0",

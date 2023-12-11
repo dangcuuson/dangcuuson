@@ -1,0 +1,15 @@
+FROM node:lts-alpine
+WORKDIR /usr/src/app
+COPY ["package.json", "yarn.lock", "./"]
+COPY packages/dcs-web/package.json packages/dcs-web/package.json
+COPY packages/dcs-webpack/package.json packages/dcs-webpack/package.json
+
+RUN yarn
+# RUN mv node_modules ../
+
+COPY . .
+EXPOSE 3000
+RUN chown -R node /usr/src/app/packages
+USER node
+# WORKDIR /usr/src/app/packages/dcs-web
+# CMD ["yarn", "start"]
