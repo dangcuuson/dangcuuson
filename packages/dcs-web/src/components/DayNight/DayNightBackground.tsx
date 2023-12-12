@@ -8,6 +8,7 @@ const DightNightBackground: React.FC<{ children?: React.ReactNode }> = ({ childr
     const { isNightMode } = React.useContext(DayNightContext);
     return (
         <Box
+            bgcolor="background.paper"
             sx={{
                 backgroundImage: `url(${isNightMode ? NightBG : DayBG})`,
                 backgroundSize: 'cover',
