@@ -2,7 +2,8 @@ import React from 'react';
 import ErrorBoundary from '../components/ErrorBoundary/ErrorBoundary';
 import { AppBar, Box, Toolbar } from '@mui/material';
 import NightModeToggle from '../components/DayNight/DayNightToggle';
-import DightNightBackground from '../components/DayNight/DayNightBackground';
+import DightNightBackground from '../components/DayNight/DayNightBackground/DayNightBackground';
+import DayNightMusicPlayer from '../components/DayNight/DayNightMusicPlayer/DayNightMusicPlayer';
 
 const MainLayout: React.FC<{}> = () => {
     return (
@@ -20,6 +21,7 @@ const MainLayout: React.FC<{}> = () => {
                         <AppBar position="sticky">
                             <Toolbar>
                                 <Box display="flex" flexGrow={1} justifyContent="flex-end">
+                                    <DayNightMusicPlayer />
                                     <NightModeToggle />
                                 </Box>
                             </Toolbar>

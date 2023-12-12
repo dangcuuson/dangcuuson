@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import React from 'react';
-import { DayNightContext } from './DayNightContext';
+import { DayNightContext } from '../DayNightContext';
 
 const DayBG = require('./DayBackground.jpg');
 const NightBG = require('./NightBackground.jpg');

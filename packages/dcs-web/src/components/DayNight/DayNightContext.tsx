@@ -1,6 +1,6 @@
 import React from 'react';
 import { Palette, ThemeProvider, colors, createTheme } from '@mui/material';
-import { useDerivedState } from '../../utils/hooks';
+import { useDerivedState, useLocalStorage } from '../../utils/hooks';
 
 type DayNightContextType = {
     isNightMode: boolean
@@ -11,8 +11,6 @@ export const DayNightContext = React.createContext<DayNightContextType>({
     isNightMode: false,
     setIsNightMode: () => null
 });
-
-const LOCAL_STORAGE_NIGHT_MODE_KEY = 'night_mode';
 
 declare module '@mui/material/styles' {
     interface Theme {
@@ -25,8 +23,9 @@ declare module '@mui/material/styles' {
 
 
 export const DayNightThemeProvider: React.FC<{ children: React.ReactNode; }> = (props) => {
-    const [isNightMode, setIsNightMode] = React.useState(() => {
-        return localStorage.getItem(LOCAL_STORAGE_NIGHT_MODE_KEY) === 'true'
+    const [isNightMode, setIsNightMode] = useLocalStorage<boolean>({
+        key: 'night_mode',
+        getInitValue: v => v === 'true'
     });
 
     const [theme] = useDerivedState(
@@ -42,14 +41,6 @@ export const DayNightThemeProvider: React.FC<{ children: React.ReactNode; }> = (
         },
         [isNightMode]
     )
-
-    React.useEffect(
-        () => {
-            localStorage.setItem(LOCAL_STORAGE_NIGHT_MODE_KEY, isNightMode + '');
-        },
-        [isNightMode]
-    )
-
     return (
         <DayNightContext.Provider
             value={{
