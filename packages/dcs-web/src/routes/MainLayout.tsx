@@ -15,7 +15,8 @@ const MainContainer = styled('div')(({ theme }) => ({
     backgroundColor: alpha(theme.palette.background.paper, 0.8),
     minHeight: '100vh',
     width: '100%',
-    maxWidth: '960px'
+    maxWidth: '960px',
+    overflow: 'auto'
 }));
 
 const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
