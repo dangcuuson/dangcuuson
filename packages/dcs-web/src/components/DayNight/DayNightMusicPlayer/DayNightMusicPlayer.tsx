@@ -61,6 +61,12 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
             if (dayAudioRef.current && nightAudioRef.current) {
                 const dayAudio = dayAudioRef.current;
                 const nightAudio = nightAudioRef.current;
+                if (!isNightMode) {
+                    // phasing to day => sync dayAuto to nightAuto
+                    dayAudio.currentTime = nightAudio.currentTime;
+                } else {
+                    nightAudio.currentTime = dayAudio.currentTime;
+                }
                 const interval = setInterval(
                     () => {
                         const dayValChange = isNightMode ? -0.1 : 0.1;
@@ -68,6 +74,13 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
 
                         dayAudio.volume = _.clamp(dayAudio.volume + dayValChange, 0, 1);
                         nightAudio.volume = _.clamp(nightAudio.volume + nightValChange, 0, 1);
+
+                        // transistion done => clear interval
+                        if((dayAudio.volume === 0 || dayAudio.volume === 1) && (
+                            nightAudio.volume === 0 || nightAudio.volume === 1
+                        )) {
+                            clearInterval(interval);
+                        }
                     },
                     100
                 )
