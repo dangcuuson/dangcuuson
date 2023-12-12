@@ -1,8 +1,15 @@
 import React from 'react';
 import SudokuPad from './components/SudokuPad/SudokuPad';
+import MainLayout from './routes/MainLayout';
+import { DayNightThemeProvider } from './components/DayNight/DayNightContext';
 
 const App: React.FC<{}> = () => {
 
+    return (
+        <DayNightThemeProvider>
+            <MainLayout />
+        </DayNightThemeProvider>
+    );
     return (
         <React.Fragment>
             {/* <SudokuPad grid={[
@@ -41,7 +48,7 @@ const App: React.FC<{}> = () => {
                 [0,7,0,9,5,0,4,0,0],
                 [0,0,0,0,0,0,0,2,6]
             ]} /> */}
-            <SudokuPad grid={[
+            {/* <SudokuPad grid={[
                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -51,7 +58,7 @@ const App: React.FC<{}> = () => {
                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0]
-            ]} />
+            ]} /> */}
         </React.Fragment>
     );
 }

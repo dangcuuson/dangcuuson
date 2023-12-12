@@ -1,6 +1,6 @@
 import React from 'react';
 
-// similar to use effect, different is that it won't
+// similar to use effect, the difference is that it won't
 // trigger the first effect callback
 export function useDidUpdate(
     effect: React.EffectCallback,
