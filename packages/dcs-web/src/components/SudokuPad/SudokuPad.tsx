@@ -1,6 +1,9 @@
 import React from 'react';
-import { SudokuGrid, SolveStep, solve } from './SudokuSolver';
+import { solve } from './SudokuSolver';
 import './SudokuPad.css';
+import { SolveStep, SudokuGrid } from './SudokuTypes';
+import { useTheme } from '@emotion/react';
+import { alpha, colors } from '@mui/material';
 
 interface Props {
     grid: SudokuGrid;
@@ -47,10 +50,46 @@ const SudokuPad: React.FC<Props> = (props) => {
     )
 }
 
+type SudokuColorPalette = {
+    black: string;
+    red: string;
+    green: string;
+    blue: string;
+}
+const useSudokuColorPalette = (): SudokuColorPalette => {
+    const { palette } = useTheme();
+    const { augmentColor, mode } = palette;
+    const grey = augmentColor({ color: colors.grey });
+    const red = augmentColor({
+        color: {
+            main: colors.red[200]
+        }
+    });
+    const green = augmentColor({
+        color: {
+            main: colors.green[200]
+        }
+    });
+    const blue = augmentColor({
+        color: {
+            main: colors.blue[600]
+        }
+    });
+
+    return {
+        black: mode === 'dark' ? grey.dark : grey.contrastText,
+        red: mode === 'dark' ? red.dark : red.light,
+        green: mode === 'dark' ? green.dark : green.light,
+        blue: mode === 'dark' ? blue.dark : blue.light,
+    }
+}
+
 const StepRenderer: React.FC<{
     originGrid: SudokuGrid;
     currentStep?: SolveStep;
 }> = ({ originGrid, currentStep }) => {
+    const sudokuColors = useSudokuColorPalette();
+
     const cellSize = 64;
     const margin = 8;
     const svgSize = cellSize * 9 + margin * 2;
@@ -89,7 +128,7 @@ const StepRenderer: React.FC<{
             return (
                 <text
                     key={index}
-                    className={!isOrigin ? 'user-input' : undefined}
+                    fill={!isOrigin ? sudokuColors.blue : undefined}
                     x={(col + 0.5) * cellSize}
                     y={(row + 0.5) * cellSize}
                     children={val}
@@ -102,10 +141,22 @@ const StepRenderer: React.FC<{
         return highlights.map((hl, index) => {
             const x = hl.col * cellSize;
             const y = hl.row * cellSize;
+            const getHlColor = () => {
+                if (hl.color === 'red') {
+                    return sudokuColors.red;
+                }
+                if (hl.color === 'green') {
+                    return sudokuColors.green;
+                }
+                if (hl.color === 'blue') {
+                    return sudokuColors.blue;
+                }
+                return hl.color;
+            }
             return (
                 <path
                     key={index}
-                    fill={hl.color}
+                    fill={getHlColor()}
                     d={`M${x} ${y} h${cellSize} v${cellSize} h${-cellSize} v${-cellSize}`}
                 />
             )
@@ -145,7 +196,7 @@ const StepRenderer: React.FC<{
             <g className='highlights'>
                 {drawHighlights()}
             </g>
-            <g className='pencil-marks'>
+            <g className='pencil-marks' style={{ mixBlendMode: 'difference' }}>
                 {drawPencilMarks()}
             </g>
             <g className='grids'>
@@ -153,7 +204,7 @@ const StepRenderer: React.FC<{
                     data-type="outer-grid"
                     d={getOuterGridCommand()}
                     fill="none"
-                    stroke="#000"
+                    stroke={sudokuColors.black}
                     strokeWidth={3}
                     vectorEffect="non-scaling-stroke"
                 />
@@ -161,11 +212,11 @@ const StepRenderer: React.FC<{
                     data-type="inner-grid"
                     d={getInnerGridCommand()}
                     fill="none"
-                    stroke="#000"
+                    stroke={sudokuColors.black}
                     vectorEffect="non-scaling-stroke"
                 />
             </g>
-            <g className='grid-values'>
+            <g className='grid-values' fill={sudokuColors.black}>
                 {drawGridValues()}
             </g>
         </svg>

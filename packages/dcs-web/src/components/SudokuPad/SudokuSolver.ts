@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { CellHighlight, PencilMark, SolveStep, SudokuGrid } from './SudokuPadTypes';
+import { CellHighlight, PencilMark, SolveStep, SudokuGrid } from './SudokuTypes';
 
 class MultipleSolutionsFoundError extends Error {
     constructor(public solutions: SudokuGrid[]) {
@@ -55,8 +55,6 @@ function buildPencilMarks(grid: SudokuGrid): PencilMark[] {
     return pMarks;
 }
 
-const RED = '#ef9a9a';
-const GREEN = '#c5e1a5';
 type SolveOptions = {
     showSteps?: boolean;
 }
@@ -223,7 +221,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                 grid,
                 pMarks,
                 highlights: singleCandidates.map(sc => ({
-                    row: sc.row, col: sc.col, color: GREEN
+                    row: sc.row, col: sc.col, color: 'green'
                 }))
             });
             const placements = singleCandidates.map<DigitPlacement>(sc => ({
@@ -287,7 +285,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                                 highlights: pMarksSet.pMarks.map(pMark => ({
                                     row: pMark.row,
                                     col: pMark.col,
-                                    color: pMark.row === row && pMark.col === col ? GREEN : RED,
+                                    color: pMark.row === row && pMark.col === col ? 'green' : 'red',
                                     pMark: (pMark.row === row && pMark.col === col)
                                         ? [{ type: 'circle', value: candidateValue }]
                                         : undefined
@@ -355,12 +353,12 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                                             ...setTest.map<CellHighlight>(pMark => ({
                                                 col: pMark.col,
                                                 row: pMark.row,
-                                                color: GREEN
+                                                color: 'green'
                                             })),
                                             ...removed.map<CellHighlight>(pMark => ({
                                                 col: pMark.col,
                                                 row: pMark.row,
-                                                color: RED
+                                                color: 'red'
                                             }))
                                         ]
                                     })
@@ -431,12 +429,12 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                                         ...group.map<CellHighlight>(pMark => ({
                                             col: pMark.col,
                                             row: pMark.row,
-                                            color: GREEN
+                                            color: 'green'
                                         })),
                                         ...removed.map<CellHighlight>(pMark => ({
                                             col: pMark.col,
                                             row: pMark.row,
-                                            color: RED
+                                            color: 'red'
                                         }))
                                     ]
                                 })
@@ -484,12 +482,12 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                                         .map<CellHighlight>(pMark => ({
                                             col: pMark.col,
                                             row: pMark.row,
-                                            color: GREEN
+                                            color: 'green'
                                         })),
                                     ...removed.map<CellHighlight>(pMark => ({
                                         col: pMark.col,
                                         row: pMark.row,
-                                        color: RED
+                                        color: 'red'
                                     }))
                                 ]
                             })
@@ -585,12 +583,12 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                                             .map<CellHighlight>(pMark => ({
                                                 col: pMark.col,
                                                 row: pMark.row,
-                                                color: GREEN
+                                                color: 'green'
                                             })),
                                         ...removed.map<CellHighlight>(pMark => ({
                                             col: pMark.col,
                                             row: pMark.row,
-                                            color: RED
+                                            color: 'red'
                                         }))
                                     ]
                                 })
@@ -630,7 +628,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                             pMarks,
                             comment:
                                 `Using bifurcation, putting ${value} in row ${testPMark.row + 1}, column ${testPMark.col + 1} lead to an invalid solution.`,
-                            highlights: [{ col: testPMark.col, row: testPMark.row, color: RED }]
+                            highlights: [{ col: testPMark.col, row: testPMark.row, color: 'red' }]
                         })
                         testPMark.candidates = testPMark.candidates.filter(v => v !== value);
                         return true;
