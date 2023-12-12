@@ -10,7 +10,3 @@
 .sudoku-pad .grid-values text {
     font-size: 3rem;
 }
-
-.sudoku-pad .grid-values .user-input {
-    fill: #2196f3;
-}
