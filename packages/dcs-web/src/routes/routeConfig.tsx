@@ -2,8 +2,9 @@ import _ from 'lodash';
 import React from 'react';
 import { RouteProps } from 'react-router-dom';
 
-const HomePage = React.lazy(() => import('./HomePage/HomePage'));
-const SudokuPage = React.lazy(() => import('./Sudoku/SudokuPage'));
+const HomePage = React.lazy(() => import('./Home/HomePage'));
+const SudokuGamePage = React.lazy(() => import('./SudokuGame/SudokuGamePage'));
+const SudokuSolverPage = React.lazy(() => import('./SudokuSolver/SudokuSolverPage'));
 
 export interface RouteItemConfig<TGet extends Function = Function> {
     props: RouteProps;
@@ -19,8 +20,12 @@ export const routeConfigs = {
         get: () => '/',
         props: { path: '/', element: <HomePage /> }
     }),
-    sudoku: createRouteItemConfig({
-        get: () => '/sudoku',
-        props: { path: '/sudoku', element: <SudokuPage /> }
+    sudokuGame: createRouteItemConfig({
+        get: () => '/sudoku-game',
+        props: { path: '/sudoku-game', element: <SudokuGamePage /> }
+    }),
+    sudokuSolve: createRouteItemConfig({
+        get: () => '/sudoku-solve',
+        props: { path: '/sudoku-solve', element: <SudokuSolverPage /> }
     })
 }

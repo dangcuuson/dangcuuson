@@ -1,8 +1,11 @@
-import { Box, Button, Card, CardActionArea, CardContent, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import SudokuPad from '../../components/SudokuPad/SudokuPad';
 import React from 'react';
+import { useNavigate } from 'react-router';
+import { routeConfigs } from '../routeConfig';
 
 const HomePage: React.FC<{}> = () => {
+    const navigate = useNavigate();
     return (
         <Box width="100%" display="flex" flexDirection="column" alignItems="center">
             <SudokuPad
@@ -19,11 +22,17 @@ const HomePage: React.FC<{}> = () => {
                 ]}
             />
             <Box marginBottom={2} width="100%">
-                <Button variant="text" color="primary" fullWidth={true} size="large">
+                <Button
+                    variant="outlined" color="primary" fullWidth={true} size="large"
+                    onClick={() => navigate(routeConfigs.sudokuGame.get())}
+                >
                     <Typography variant="h4">Play Sudoku</Typography>
                 </Button>
             </Box>
-            <Button variant="text" color="secondary" fullWidth={true} size="large">
+            <Button
+                variant="outlined" color="secondary" fullWidth={true} size="large"
+                onClick={() => navigate(routeConfigs.sudokuSolve.get())}
+            >
                 <Typography variant="h4">Help me solve one</Typography>
             </Button>
         </Box>
