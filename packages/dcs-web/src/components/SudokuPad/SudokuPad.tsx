@@ -1,54 +1,8 @@
 import React from 'react';
-import { solve } from './SudokuSolver';
 import './SudokuPad.css';
 import { SolveStep, SudokuGrid } from './SudokuTypes';
 import { useTheme } from '@emotion/react';
-import { alpha, colors } from '@mui/material';
-
-interface Props {
-    grid: SudokuGrid;
-}
-const SudokuPad: React.FC<Props> = (props) => {
-    const [steps, setSteps] = React.useState<SolveStep[]>([]);
-    React.useEffect(
-        () => {
-            const { steps } = solve(props.grid, { showSteps: true })
-            setSteps(steps);
-        },
-        []
-    )
-
-    function renderGrid(grid: SudokuGrid) {
-        return (
-            grid.map((row, rowIndex) => {
-                return (
-                    <div key={rowIndex}>
-                        {row.map((val, colIndex) => {
-                            return (
-                                <span key={colIndex}>
-                                    {val}
-                                </span>
-                            );
-                        })}
-                    </div>
-                )
-            })
-        )
-    }
-    return (
-        <React.Fragment>
-            <StepRenderer originGrid={props.grid} />
-            {steps.map((step, index) => {
-                return (
-                    <div key={index}>
-                        <div>Step #{index + 1}: {step.comment}</div>
-                        <StepRenderer originGrid={props.grid} currentStep={step} />
-                    </div>
-                )
-            })}
-        </React.Fragment>
-    )
-}
+import { colors } from '@mui/material';
 
 type SudokuColorPalette = {
     black: string;
@@ -84,10 +38,12 @@ const useSudokuColorPalette = (): SudokuColorPalette => {
     }
 }
 
-const StepRenderer: React.FC<{
+interface Props {
     originGrid: SudokuGrid;
     currentStep?: SolveStep;
-}> = ({ originGrid, currentStep }) => {
+}
+
+const SudokuPad: React.FC<Props> = ({ originGrid, currentStep }) => {
     const sudokuColors = useSudokuColorPalette();
 
     const cellSize = 64;
