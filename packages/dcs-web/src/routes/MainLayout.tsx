@@ -13,7 +13,7 @@ const MainContainer = styled('div')(({ theme }) => ({
     margin: 'auto',
     boxShadow: theme.shadows[4],
     backgroundColor: alpha(theme.palette.background.paper, 0.8),
-    height: '100vh',
+    minHeight: '100vh',
     width: '100%',
     maxWidth: '960px'
 }));
