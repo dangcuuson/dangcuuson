@@ -1,5 +1,5 @@
 import React from 'react';
-import { Palette, ThemeProvider, createTheme, useMediaQuery } from '@mui/material';
+import { ThemeProvider, createTheme, useMediaQuery } from '@mui/material';
 import { useDerivedState, useLocalStorage } from '../../utils/hooks';
 
 type DayNightContextType = {
@@ -11,16 +11,6 @@ export const DayNightContext = React.createContext<DayNightContextType>({
     isNightMode: false,
     setIsNightMode: () => null
 });
-
-declare module '@mui/material/styles' {
-    interface Theme {
-        palette: Palette;
-    }
-    // allow configuration using `createTheme`
-    interface ThemeOptions {
-
-    }
-}
 
 
 export const DayNightThemeProvider: React.FC<{ children: React.ReactNode; }> = (props) => {

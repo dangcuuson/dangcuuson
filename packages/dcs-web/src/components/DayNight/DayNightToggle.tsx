@@ -2,12 +2,6 @@ import React from 'react';
 import { DayNightContext } from './DayNightContext';
 import styled from '@emotion/styled';
 import { FormControlLabel, Switch } from '@mui/material';
-import { Theme as MUITheme } from "@mui/material";
-
-// fix inconsistent type between MUITheme and emotionTheme
-declare module "@emotion/react" {
-    export interface Theme extends MUITheme { }
-}
 
 // copied from https://mui.com/material-ui/react-switch/
 const DayNightSwitch = styled(Switch)(({ theme }) => {
