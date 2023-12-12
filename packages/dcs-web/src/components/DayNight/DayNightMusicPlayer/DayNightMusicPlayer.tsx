@@ -4,31 +4,56 @@ import _ from 'lodash';
 import MusicIcon from '@mui/icons-material/MusicNote';
 import MusicOffIcon from '@mui/icons-material/MusicOff';
 import { IconButton } from '@mui/material';
-import { useLocalStorage } from '../../../utils/hooks';
+import { useInteractionTracker, useIsWindowFocused, useLocalStorage } from '../../../utils/hooks';
 
 const DaySong = require('./DaySong.mp3');
 const NightSong = require('./NightSong.mp3');
 
 const DayNightMusicPlayer: React.FC<{}> = () => {
     const { isNightMode } = React.useContext(DayNightContext);
-    const [isMuted, setIsMuted] = useLocalStorage<boolean>({
+    const [isMutedByUser, setIsMutedByUser] = useLocalStorage<boolean>({
         key: 'is_muted',
         getInitValue: v => v === 'true'
-    });
+    });    
     const dayAudioRef = React.useRef<HTMLAudioElement>(null);
     const nightAudioRef = React.useRef<HTMLAudioElement>(null);
 
     const [daySongLoaded, setDaySongLoaded] = React.useState(false);
     const [nightSongLoaded, setNightSongLoaded] = React.useState(false);
 
+    const [retryAutoplay, setRetryAutoplay] = React.useState(false);
+    const interactionTracker = useInteractionTracker(retryAutoplay);
+    const attemptAutoPlay = async () => {
+        try {
+            await Promise.all([
+                dayAudioRef.current?.play(),
+                nightAudioRef.current?.play()
+            ]);
+            setRetryAutoplay(false);
+        } catch (err) {
+            // Some browser prevent auto play until some "user interaction" has been initiated
+            // https://developer.mozilla.org/en-US/docs/Web/Media/Autoplay_guide
+            // set this flag to attempt to auto play again when some "interaction" happed
+            setRetryAutoplay(true);
+        }
+    }
+
     React.useEffect(
         () => {
-            if (daySongLoaded && nightSongLoaded) {
-                dayAudioRef.current?.play();
-                nightAudioRef.current?.play();
+            if (retryAutoplay) {
+                attemptAutoPlay();
             }
         },
-        [daySongLoaded, nightSongLoaded]
+        [interactionTracker]
+    );
+
+    React.useEffect(
+        () => {
+            if (daySongLoaded && nightSongLoaded && !isMutedByUser) {
+                attemptAutoPlay();
+            }
+        },
+        [daySongLoaded, nightSongLoaded, isMutedByUser]
     )
 
     React.useEffect(
@@ -40,7 +65,6 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
                     () => {
                         const dayValChange = isNightMode ? -0.1 : 0.1;
                         const nightValChange = -dayValChange;
-
 
                         dayAudio.volume = _.clamp(dayAudio.volume + dayValChange, 0, 1);
                         nightAudio.volume = _.clamp(nightAudio.volume + nightValChange, 0, 1);
@@ -54,6 +78,8 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
         },
         [isNightMode]
     )
+
+    const isWindowFocused = useIsWindowFocused();
     return (
         <React.Fragment>
             <audio
@@ -61,18 +87,20 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
                 src={DaySong}
                 onCanPlay={() => setDaySongLoaded(true)}
                 loop={true}
-                muted={isMuted}
+                muted={isMutedByUser || !isWindowFocused}
+                playsInline={true}
             />
             <audio
                 ref={nightAudioRef}
                 src={NightSong}
                 onCanPlay={() => setNightSongLoaded(true)}
                 loop={true}
-                muted={isMuted}
+                muted={isMutedByUser || !isWindowFocused}
+                playsInline={true}
             />
             <IconButton
-                children={isMuted ? <MusicOffIcon /> : <MusicIcon />}
-                onClick={() => setIsMuted(v => !v)}
+                children={isMutedByUser ? <MusicOffIcon /> : <MusicIcon />}
+                onClickCapture={() => setIsMutedByUser(!isMutedByUser)}
             />
         </React.Fragment>
     )

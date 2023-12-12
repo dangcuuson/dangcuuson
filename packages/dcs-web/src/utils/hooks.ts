@@ -42,6 +42,49 @@ export function useLocalStorage<T = string>(args: {
     return [valueState, setValueState];
 }
 
+export function useIsWindowFocused() {
+    const [isFocused, setIsFocused] = React.useState(document.hasFocus());
+    React.useEffect(
+        () => {
+            const handleOnFocus = () => setIsFocused(true);
+            const handleOnBlur = () => setIsFocused(false);
+            window.addEventListener('focus', handleOnFocus);
+            window.addEventListener('blur', handleOnBlur);
+            return () => {
+                window.removeEventListener('focus', handleOnFocus);
+                window.removeEventListener('blur', handleOnBlur);
+            }
+        },
+        []
+    );
+    return isFocused;
+}
+
+/**
+ * Track if user has interacted with the site via click/touch
+ * Mostly used for media autoplay
+ */
+export function useInteractionTracker(tracking: boolean) {
+    const [count, setCount] = React.useState(0);
+    React.useEffect(
+        () => {
+            const increaseCount = () => {
+                if (tracking) {
+                    setCount(p => p + 1)
+                }
+            };
+            document.addEventListener('click', increaseCount);
+            document.addEventListener('touchstart', increaseCount);
+            return () => {
+                document.removeEventListener('click', increaseCount);
+                document.removeEventListener('touchstart', increaseCount);
+            }
+        },
+        [tracking]
+    );
+    return count;
+}
+
 type MapStateFn<TState> = (prevState: TState | null) => TState;
 export function useDerivedState<TState>(mapFn: MapStateFn<TState>, dependencies: any[]) {
     const [state, setState] = React.useState(() => mapFn(null));
