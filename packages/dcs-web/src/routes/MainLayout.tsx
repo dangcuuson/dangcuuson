@@ -1,35 +1,47 @@
 import React from 'react';
 import ErrorBoundary from '../components/ErrorBoundary/ErrorBoundary';
-import { AppBar, Box, Toolbar } from '@mui/material';
+import { Box, IconButton, alpha } from '@mui/material';
+import styled from '@emotion/styled';
 import NightModeToggle from '../components/DayNight/DayNightToggle';
 import DightNightBackground from '../components/DayNight/DayNightBackground/DayNightBackground';
 import DayNightMusicPlayer from '../components/DayNight/DayNightMusicPlayer/DayNightMusicPlayer';
+import { useNavigate } from 'react-router-dom';
+import { routeConfigs } from './routeConfig';
+import HomeIcon from '@mui/icons-material/Home';
 
-const MainLayout: React.FC<{}> = () => {
+const MainContainer = styled('div')(({ theme }) => ({
+    margin: 'auto',
+    boxShadow: theme.shadows[4],
+    backgroundColor: alpha(theme.palette.background.paper, 0.8),
+    height: '100vh',
+    width: '100%',
+    maxWidth: '960px'
+}));
+
+const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+    const navigate = useNavigate();
     return (
         <ErrorBoundary>
             <React.Suspense fallback="Loading...">
                 <DightNightBackground>
-                    <Box
-                        boxShadow={4}
-                        margin="auto"
-                        bgcolor="background.paper"
-                        height={'1000px'}
-                        width="100%"
-                        maxWidth="960px"
-                    >
-                        <AppBar position="sticky">
-                            <Toolbar>
-                                <Box display="flex" flexGrow={1} justifyContent="flex-end">
-                                    <DayNightMusicPlayer />
-                                    <NightModeToggle />
-                                </Box>
-                            </Toolbar>
-                        </AppBar>
-                    </Box>
+                    <MainContainer>
+                        <Box display="flex" flexGrow={1} justifyContent="flex-start">
+                            <IconButton
+                                size="large"
+                                onClick={() => navigate(routeConfigs.home.get())}
+                                children={<HomeIcon />}
+                            />
+                            <DayNightMusicPlayer />
+                            <NightModeToggle />
+
+                        </Box>
+                        <Box padding={2}>
+                            {children}
+                        </Box>
+                    </MainContainer>
                 </DightNightBackground>
             </React.Suspense>
-        </ErrorBoundary>
+        </ErrorBoundary >
     )
 }
 

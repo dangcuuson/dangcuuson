@@ -14,7 +14,7 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
     const [isMutedByUser, setIsMutedByUser] = useLocalStorage<boolean>({
         key: 'is_muted',
         getInitValue: v => v === 'true'
-    });    
+    });
     const dayAudioRef = React.useRef<HTMLAudioElement>(null);
     const nightAudioRef = React.useRef<HTMLAudioElement>(null);
 
@@ -76,7 +76,7 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
                         nightAudio.volume = _.clamp(nightAudio.volume + nightValChange, 0, 1);
 
                         // transistion done => clear interval
-                        if((dayAudio.volume === 0 || dayAudio.volume === 1) && (
+                        if ((dayAudio.volume === 0 || dayAudio.volume === 1) && (
                             nightAudio.volume === 0 || nightAudio.volume === 1
                         )) {
                             clearInterval(interval);
@@ -112,6 +112,7 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
                 playsInline={true}
             />
             <IconButton
+                size="large"
                 children={isMutedByUser ? <MusicOffIcon /> : <MusicIcon />}
                 onClickCapture={() => setIsMutedByUser(!isMutedByUser)}
             />
