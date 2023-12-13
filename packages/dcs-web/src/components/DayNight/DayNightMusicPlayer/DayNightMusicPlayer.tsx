@@ -3,8 +3,9 @@ import { DayNightContext } from '../DayNightContext';
 import _ from 'lodash';
 import MusicIcon from '@mui/icons-material/MusicNote';
 import MusicOffIcon from '@mui/icons-material/MusicOff';
-import { IconButton } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import { useInteractionTracker, useIsWindowFocused, useLocalStorage } from '../../../utils/hooks';
+import { CircularProgress } from '@mui/material';
 
 const DaySong = require('./DaySong.mp3');
 const NightSong = require('./NightSong.mp3');
@@ -97,7 +98,13 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
     // for now let music play even if window is not focused
     isWindowFocused = true;
     return (
-        <React.Fragment>
+        <Box position="relative">
+            {(!daySongLoaded || !nightSongLoaded) && (
+                <CircularProgress style={{ position: 'absolute', left: 4, top: 4 }} />
+            )}
+            {!!daySongLoaded && nightSongLoaded && !!retryAutoplay && !isMutedByUser && (
+                <CircularProgress variant="determinate" value={100} color="error" style={{ position: 'absolute', left: 4, top: 4 }} />
+            )}
             <audio
                 ref={dayAudioRef}
                 src={DaySong}
@@ -119,7 +126,7 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
                 children={isMutedByUser ? <MusicOffIcon /> : <MusicIcon />}
                 onClickCapture={() => setIsMutedByUser(!isMutedByUser)}
             />
-        </React.Fragment>
+        </Box>
     )
 };
 
