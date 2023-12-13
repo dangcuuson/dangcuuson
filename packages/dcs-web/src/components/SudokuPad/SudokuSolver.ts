@@ -57,6 +57,7 @@ function buildPencilMarks(grid: SudokuGrid): PencilMark[] {
 
 type SolveOptions = {
     showSteps?: boolean;
+    randomBifurcation?: boolean;
 }
 export type SolveResult = {
     solution?: SudokuGrid;
@@ -611,7 +612,15 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
         }
 
         function bifurcation(): boolean {
-            const testPMark = _.minBy(pMarks, pMark => pMark.candidates.length);
+            const getTestPMark = (): PencilMark | undefined => {
+                if (options.randomBifurcation) {
+                    const index = _.random(0, pMarks.length);
+                    return pMarks[index];
+                } else {
+                    return _.minBy(pMarks, pMark => pMark.candidates.length);
+                }
+            }
+            const testPMark = getTestPMark();
             if (testPMark) {
                 const solutionsFound: SudokuGrid[] = [];
                 // try filling the grid with one the candidate
