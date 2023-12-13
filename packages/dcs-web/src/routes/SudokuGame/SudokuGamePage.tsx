@@ -1,13 +1,15 @@
 import { Box, Button, Rating, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import React from 'react';
 import GoBackIcon from '@mui/icons-material/KeyboardReturn';
 import { PencilMark, SudokuGrid } from '../../components/SudokuPad/SudokuTypes';
-import { useDerivedState, useLocalStorage } from '../../utils/hooks';
+import { useLocalStorage } from '../../utils/hooks';
 import _ from 'lodash';
 import { useNavigate } from 'react-router';
 import { generateGrid } from '../../components/SudokuPad/SudokuGenerator';
 import SudokuPadInteractive from '../../components/SudokuPad/SudokuPadInteractive';
 import { hasNumArrField, hasNumField, makeArr } from '../../utils/dataUtils';
+import confetti from 'canvas-confetti';
+import { solve } from '../../components/SudokuPad/SudokuSolver';
 
 const SudokuPage: React.FC<{}> = () => {
     const navigate = useNavigate();
@@ -59,9 +61,11 @@ const SudokuPage: React.FC<{}> = () => {
                             variant="contained" color="primary" size="large" fullWidth={true}
                             onClick={() => {
                                 setOriginGrid(generateGrid(difficulty - 1));
+                                localStorage.removeItem(SUDOKU_GAME_CURRENT_GRID);
+                                localStorage.removeItem(SUDOKU_GAME_PENCIL_MARKS);
                             }}
                         >
-                            Start
+                            <Typography variant="h6">Start</Typography>
                         </Button>
                     </Box>
                 </Box>
@@ -73,12 +77,15 @@ const SudokuPage: React.FC<{}> = () => {
     )
 }
 
+const SUDOKU_GAME_CURRENT_GRID = 'sudoku_game_current_grid';
+const SUDOKU_GAME_PENCIL_MARKS = 'sudoku_game_pencil_marks';
+
 interface InnerProps {
     originGrid: SudokuGrid
 }
 const SudokuPageInner: React.FC<InnerProps> = ({ originGrid }) => {
     const [currentGrid, setCurrentGrid] = useLocalStorage<SudokuGrid>({
-        key: 'sudoku_game_current_grid',
+        key: SUDOKU_GAME_CURRENT_GRID,
         getInitValue: (value) => {
             const digits = (value || '').replace(/[^0-9]/g, '');
             if (digits.length === 81) {
@@ -92,7 +99,7 @@ const SudokuPageInner: React.FC<InnerProps> = ({ originGrid }) => {
     });
 
     const [pencilMarks, setPencilMarks] = useLocalStorage<PencilMark[]>({
-        key: 'sudoku_game_pencil_marks',
+        key: SUDOKU_GAME_PENCIL_MARKS,
         stringify: pMarks => JSON.stringify(pMarks),
         getInitValue: (value) => {
             try {
@@ -131,8 +138,23 @@ const SudokuPageInner: React.FC<InnerProps> = ({ originGrid }) => {
                 pencilMarks={pencilMarks}
                 setPencilMarks={setPencilMarks}
             />
-            <Button fullWidth={true}>
-                Check result
+            <Button 
+                color="primary" fullWidth={true} variant="contained" size="large"
+                onClick={() => {
+                    const result = solve(originGrid);
+                    
+                }}
+            >
+                <Typography variant="h6">Hint</Typography>
+            </Button>
+            <Button 
+                color="primary" fullWidth={true} variant="contained" size="large"
+                onClick={() => {
+                    const result = solve(originGrid);
+                    
+                }}
+            >
+                <Typography variant="h6">Check result</Typography>
             </Button>
         </Box>
     )

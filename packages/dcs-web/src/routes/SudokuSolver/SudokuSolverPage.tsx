@@ -45,7 +45,7 @@ const SudokuSolverPage: React.FC<{}> = () => {
     const [solveResult, setSolveResult] = React.useState<SolveResult | null>(null);
     return (
         <Box id="solve-page" textAlign="center" width="100%">
-            <Box display="flex" justifyContent="flex-end" width="100%">
+            <Box display="flex" justifyContent="flex-start" width="100%">
                 <Button
                     variant="text"
                     startIcon={<GoBackIcon />}
@@ -73,11 +73,12 @@ const SudokuSolverPage: React.FC<{}> = () => {
                     />
                     <Button
                         variant="contained" color="primary" size="large"
+                        fullWidth={true}
                         onClick={() => {
                             setSolveResult(solve(currentGrid, { showSteps: true }));
                         }}
                     >
-                        <Typography variant="h4">Solve</Typography>
+                        <Typography variant="h6">Solve</Typography>
                     </Button>
                 </React.Fragment>
             )}

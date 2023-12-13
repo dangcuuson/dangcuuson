@@ -23,17 +23,17 @@ const HomePage: React.FC<{}> = () => {
             />
             <Box marginBottom={2} width="100%">
                 <Button
-                    variant="outlined" color="primary" fullWidth={true} size="large"
+                    variant="contained" color="primary" fullWidth={true} size="large"
                     onClick={() => navigate(routeConfigs.sudokuGame.get())}
                 >
-                    <Typography variant="h4">Play Sudoku</Typography>
+                    <Typography variant="h6">Play Sudoku</Typography>
                 </Button>
             </Box>
             <Button
-                variant="outlined" color="secondary" fullWidth={true} size="large"
+                variant="contained" color="secondary" fullWidth={true} size="large"
                 onClick={() => navigate(routeConfigs.sudokuSolve.get())}
             >
-                <Typography variant="h4">Help me solve one</Typography>
+                <Typography variant="h6">Help me solve one</Typography>
             </Button>
         </Box>
     );
