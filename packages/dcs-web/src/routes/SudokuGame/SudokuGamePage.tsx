@@ -1,4 +1,4 @@
-import { Box, Button, Rating, Typography } from '@mui/material';
+import { Box, Button, IconButton, Rating, Typography } from '@mui/material';
 import React from 'react';
 import GoBackIcon from '@mui/icons-material/KeyboardReturn';
 import { PencilMark, SolveStep, SudokuGrid } from '../../components/SudokuPad/SudokuTypes';
@@ -11,6 +11,8 @@ import { hasNumArrField, hasNumField, makeArr } from '../../utils/dataUtils';
 import confetti from 'canvas-confetti';
 import { solve } from '../../components/SudokuPad/SudokuSolver';
 import { createEmptyGrid, parseGrid } from '../../components/SudokuPad/SudokuHelper';
+import NextIcon from '@mui/icons-material/SkipNext';
+import PrevIcon from '@mui/icons-material/SkipPrevious';
 
 const SudokuPage: React.FC<{}> = () => {
     const navigate = useNavigate();
@@ -31,11 +33,7 @@ const SudokuPage: React.FC<{}> = () => {
                     startIcon={<GoBackIcon />}
                     children="Back"
                     onClick={() => {
-                        if (originGrid) {
-                            setOriginGrid(null);
-                        } else {
-                            navigate('/');
-                        }
+                        navigate('/');
                     }}
                 />
             </Box>
@@ -66,7 +64,20 @@ const SudokuPage: React.FC<{}> = () => {
                 </Box>
             )}
             {!!originGrid && (
-                <SudokuGamePageInner originGrid={originGrid} />
+                <React.Fragment>
+                    <SudokuGamePageInner originGrid={originGrid} />
+                    <Button
+                        variant="contained" color="primary" size="large" fullWidth={true}
+                        onClick={() => {
+                            const ok = confirm('Abort current game?');
+                            if (ok) {
+                                setOriginGrid(null);
+                            }
+                        }}
+                    >
+                        <Typography variant="h6">Restart</Typography>
+                    </Button>
+                </React.Fragment>
             )}
         </Box>
     )
@@ -124,14 +135,26 @@ const SudokuGamePageInner: React.FC<InnerProps> = ({ originGrid }) => {
                 return []
             }
         }
-    })
+    });
+    const curHintStep = (hintSteps || [])[hintStepIndex];
 
     return (
         <Box width="100%">
             <SudokuPadInteractive
                 originGrid={originGrid}
                 currentGrid={currentGrid}
-                setCurrentGrid={setCurrentGrid}
+                setCurrentGrid={curGrid => {
+                    setCurrentGrid(curGrid);
+                    setHintSteps([]);
+                    const correct = correctGrid.join(',') === curGrid.join(',');
+                    if (correct) {
+                        confetti({
+                            particleCount: 100,
+                            spread: 70,
+                            origin: { y: 0.6 }
+                        });
+                    }
+                }}
                 pencilMarks={pencilMarks}
                 setPencilMarks={setPencilMarks}
                 hints={{
@@ -139,6 +162,25 @@ const SudokuGamePageInner: React.FC<InnerProps> = ({ originGrid }) => {
                     steps: hintSteps
                 }}
             />
+            {!!curHintStep && (
+                <Box display="flex" alignItems="center">
+                    <IconButton
+                        size='large'
+                        disabled={hintStepIndex <= 0}
+                        children={<PrevIcon />}
+                        onClick={() => setHintStepIndex(hintStepIndex - 1)}
+                    />
+                    <Typography variant="h4" color="text.primary">
+                        {curHintStep.comment || ''}
+                    </Typography>
+                    <IconButton
+                        size='large'
+                        disabled={hintStepIndex >= (hintSteps || []).length - 1}
+                        children={<NextIcon />}
+                        onClick={() => setHintStepIndex(hintStepIndex + 1)}
+                    />
+                </Box>
+            )}
             <Box width="100%" marginBottom={2}>
                 <Button
                     color="secondary" fullWidth={true} variant="contained" size="large"
@@ -146,7 +188,7 @@ const SudokuGamePageInner: React.FC<InnerProps> = ({ originGrid }) => {
                         const newGrid = createEmptyGrid();
                         // ony keep correct value of current grid
                         for (let row = 0; row < 9; row++) {
-s                            for (let col = 0; col < 9; col++) {
+                            for (let col = 0; col < 9; col++) {
                                 const curGridVal = currentGrid[row][col];
                                 const correctVal = correctGrid[row][col];
                                 newGrid[row][col] = curGridVal === correctVal ? curGridVal : 0;
@@ -161,15 +203,6 @@ s                            for (let col = 0; col < 9; col++) {
                     <Typography variant="h6">Hint</Typography>
                 </Button>
             </Box>
-            <Button
-                color="primary" fullWidth={true} variant="contained" size="large"
-                onClick={() => {
-                    const result = solve(originGrid);
-
-                }}
-            >
-                <Typography variant="h6">Check result</Typography>
-            </Button>
         </Box>
     )
 }

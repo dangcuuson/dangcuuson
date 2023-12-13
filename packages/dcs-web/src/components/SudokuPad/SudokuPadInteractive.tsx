@@ -1,7 +1,7 @@
 import React from 'react';
 import { GridPosition, PencilMark, SolveStep, SudokuGrid } from './SudokuTypes';
 import SudokuPad from './SudokuPad';
-import { Box, Button, Typography, useMediaQuery } from '@mui/material';
+import { Box, Button, useMediaQuery } from '@mui/material';
 import _ from 'lodash';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
@@ -12,7 +12,7 @@ import { calcBoxIndex } from './SudokuSolver';
 interface Props {
     originGrid: SudokuGrid;
     currentGrid: SudokuGrid;
-    setCurrentGrid: React.Dispatch<React.SetStateAction<SudokuGrid>>;
+    setCurrentGrid: (grid: SudokuGrid) => void;
     pencilMarks: PencilMark[];
     setPencilMarks: React.Dispatch<React.SetStateAction<PencilMark[]>>;
     hints?: {
@@ -51,11 +51,6 @@ const SudokuPadInteractive: React.FC<Props> = (props) => {
                             pMarks: props.pencilMarks
                         }}
                     />
-                    {!!hintStep && (
-                        <Typography variant="h6" color="text.secondary">
-                            {hintStep.comment || ''}
-                        </Typography>
-                    )}
                 </Box>
                 <Box flex="1">
                     <SudokuPadControls

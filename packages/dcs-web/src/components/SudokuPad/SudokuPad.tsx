@@ -43,7 +43,7 @@ const useSudokuColorPalette = (): SudokuColorPalette => {
         pencilMark: mode === 'dark' ? alpha(grey.light, 0.8) : grey.dark,
 
         activeCellStroke: mode === 'dark' ? blue.dark : blue.light,
-        activeCellFill: mode === 'dark' ? alpha(grey.dark, 0.5) : grey.light,
+        activeCellFill: mode === 'dark' ? alpha(grey.dark, 0.5) : alpha(grey.light, 0.5),
 
         hlRed: mode === 'dark' ? red.dark : red.light,
         hlGreen: mode === 'dark' ? green.dark : green.light,
