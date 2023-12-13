@@ -8,11 +8,12 @@ import { PencilMark, SudokuGrid } from '../../components/SudokuPad/SudokuTypes';
 import GoBackIcon from '@mui/icons-material/KeyboardReturn';
 import { useNavigate } from 'react-router';
 import { useDerivedState } from '../../utils/hooks';
+import { createEmptyGrid, parseGrid } from '../../components/SudokuPad/SudokuHelper';
 
 const SudokuSolverPage: React.FC<{}> = () => {
     const navigate = useNavigate();
     const [originGrid] = React.useState(() => {
-        return Array(9).fill(0).map(row => Array(9).fill(0))
+        return createEmptyGrid();
     });
     const [currentGrid, setCurrentGrid] = useDerivedState<SudokuGrid>(
         () => _.cloneDeep(originGrid),
@@ -26,12 +27,8 @@ const SudokuSolverPage: React.FC<{}> = () => {
         () => {
             const handlePaste = (e: ClipboardEvent) => {
                 const textData = e.clipboardData?.getData('text') || '';
-                const numonly = textData.replace(/[^0-9]/g, '');
-                if (numonly.length === 81) {
-                    const gridFromClipboard: SudokuGrid =
-                        Array(9).fill(0).map((zero, row) => {
-                            return numonly.slice(row * 9, row * 9 + 9).split('').map(digit => +digit);
-                        });
+                const gridFromClipboard = parseGrid(textData);
+                if (gridFromClipboard) {
                     setCurrentGrid(gridFromClipboard);
                 }
             }

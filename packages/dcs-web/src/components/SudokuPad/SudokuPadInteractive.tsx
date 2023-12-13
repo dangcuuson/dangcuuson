@@ -1,7 +1,7 @@
 import React from 'react';
-import { GridPosition, PencilMark, SudokuGrid } from './SudokuTypes';
+import { GridPosition, PencilMark, SolveStep, SudokuGrid } from './SudokuTypes';
 import SudokuPad from './SudokuPad';
-import { Box, Button, useMediaQuery } from '@mui/material';
+import { Box, Button, Typography, useMediaQuery } from '@mui/material';
 import _ from 'lodash';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
@@ -15,6 +15,10 @@ interface Props {
     setCurrentGrid: React.Dispatch<React.SetStateAction<SudokuGrid>>;
     pencilMarks: PencilMark[];
     setPencilMarks: React.Dispatch<React.SetStateAction<PencilMark[]>>;
+    hints?: {
+        currentStepIndex: number;
+        steps: SolveStep[];
+    }
 }
 
 type Action = SetCellAction;
@@ -31,21 +35,27 @@ const SudokuPadInteractive: React.FC<Props> = (props) => {
     const [selectedCell, setSelectedCell] = React.useState<GridPosition | null>(null);
     const isMobileView = useMediaQuery('(max-width:600px)');
 
+    const hintStep = (props.hints?.steps || [])[props.hints?.currentStepIndex ?? 0];
     return (
         <React.Fragment>
             <Box display="flex" flexDirection={!isMobileView ? 'row' : 'column'}>
-                <Box sx={{ cursor: 'pointer' }}>
+                <Box sx={{ cursor: 'pointer' }} textAlign="center">
                     <SudokuPad
                         interactive={{
                             selectedCell,
                             setSelectedCell
                         }}
                         originGrid={originGrid}
-                        currentStep={{
+                        currentStep={hintStep || {
                             grid: currentGrid,
                             pMarks: props.pencilMarks
                         }}
                     />
+                    {!!hintStep && (
+                        <Typography variant="h6" color="text.secondary">
+                            {hintStep.comment || ''}
+                        </Typography>
+                    )}
                 </Box>
                 <Box flex="1">
                     <SudokuPadControls

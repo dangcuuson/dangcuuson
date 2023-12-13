@@ -1,13 +1,14 @@
 import _ from 'lodash';
 import { solve } from './SudokuSolver';
 import { SudokuGrid } from './SudokuTypes';
+import { createEmptyGrid } from './SudokuHelper';
 
 /**
  * @param difficulty: higher = more difficult
  * @returns 
  */
 export const generateGrid = (difficulty: number): SudokuGrid => {
-    const emptyGrid: SudokuGrid = Array(9).fill(0).map(row => Array(9).fill(0));
+    const emptyGrid = createEmptyGrid();
     const { multipleSolutions } = solve(emptyGrid);
 
     const randomGrid = multipleSolutions?.[0];

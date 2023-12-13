@@ -1,7 +1,7 @@
 import { Box, Button, Rating, Typography } from '@mui/material';
 import React from 'react';
 import GoBackIcon from '@mui/icons-material/KeyboardReturn';
-import { PencilMark, SudokuGrid } from '../../components/SudokuPad/SudokuTypes';
+import { PencilMark, SolveStep, SudokuGrid } from '../../components/SudokuPad/SudokuTypes';
 import { useLocalStorage } from '../../utils/hooks';
 import _ from 'lodash';
 import { useNavigate } from 'react-router';
@@ -10,19 +10,14 @@ import SudokuPadInteractive from '../../components/SudokuPad/SudokuPadInteractiv
 import { hasNumArrField, hasNumField, makeArr } from '../../utils/dataUtils';
 import confetti from 'canvas-confetti';
 import { solve } from '../../components/SudokuPad/SudokuSolver';
+import { createEmptyGrid, parseGrid } from '../../components/SudokuPad/SudokuHelper';
 
 const SudokuPage: React.FC<{}> = () => {
     const navigate = useNavigate();
     const [originGrid, setOriginGrid] = useLocalStorage<SudokuGrid | null>({
         key: 'sudoku_game_origin_grid',
         getInitValue: (value) => {
-            const digits = (value || '').replace(/[^0-9]/g, '');
-            if (digits.length === 81) {
-                return Array(9).fill(0).map((zero, row) => {
-                    return digits.slice(row * 9, row * 9 + 9).split('').map(digit => +digit);
-                });
-            }
-            return null;
+            return parseGrid(value || '');
         },
         stringify: grid => !grid ? '' : grid.join(',')
     });
@@ -71,7 +66,7 @@ const SudokuPage: React.FC<{}> = () => {
                 </Box>
             )}
             {!!originGrid && (
-                <SudokuPageInner originGrid={originGrid} />
+                <SudokuGamePageInner originGrid={originGrid} />
             )}
         </Box>
     )
@@ -83,17 +78,19 @@ const SUDOKU_GAME_PENCIL_MARKS = 'sudoku_game_pencil_marks';
 interface InnerProps {
     originGrid: SudokuGrid
 }
-const SudokuPageInner: React.FC<InnerProps> = ({ originGrid }) => {
+const SudokuGamePageInner: React.FC<InnerProps> = ({ originGrid }) => {
+    const correctGrid = React.useMemo(
+        () => {
+            return solve(originGrid).solution || [];
+        },
+        [originGrid]
+    );
+    const [hintStepIndex, setHintStepIndex] = React.useState(-1);
+    const [hintSteps, setHintSteps] = React.useState<SolveStep[]>([]);
     const [currentGrid, setCurrentGrid] = useLocalStorage<SudokuGrid>({
         key: SUDOKU_GAME_CURRENT_GRID,
         getInitValue: (value) => {
-            const digits = (value || '').replace(/[^0-9]/g, '');
-            if (digits.length === 81) {
-                return Array(9).fill(0).map((zero, row) => {
-                    return digits.slice(row * 9, row * 9 + 9).split('').map(digit => +digit);
-                });
-            }
-            return _.cloneDeep(originGrid);
+            return parseGrid(value || '') || _.cloneDeep(originGrid);
         },
         stringify: grid => grid.join(',')
     });
@@ -137,21 +134,38 @@ const SudokuPageInner: React.FC<InnerProps> = ({ originGrid }) => {
                 setCurrentGrid={setCurrentGrid}
                 pencilMarks={pencilMarks}
                 setPencilMarks={setPencilMarks}
-            />
-            <Button 
-                color="primary" fullWidth={true} variant="contained" size="large"
-                onClick={() => {
-                    const result = solve(originGrid);
-                    
+                hints={{
+                    currentStepIndex: hintStepIndex,
+                    steps: hintSteps
                 }}
-            >
-                <Typography variant="h6">Hint</Typography>
-            </Button>
-            <Button 
+            />
+            <Box width="100%" marginBottom={2}>
+                <Button
+                    color="secondary" fullWidth={true} variant="contained" size="large"
+                    onClick={() => {
+                        const newGrid = createEmptyGrid();
+                        // ony keep correct value of current grid
+                        for (let row = 0; row < 9; row++) {
+s                            for (let col = 0; col < 9; col++) {
+                                const curGridVal = currentGrid[row][col];
+                                const correctVal = correctGrid[row][col];
+                                newGrid[row][col] = curGridVal === correctVal ? curGridVal : 0;
+                            }
+                        }
+                        // solve with new grid but stop at first digit
+                        const solveResult = solve(newGrid, { showSteps: true, skipPencilmarkStep: true, stopAtFirstDigit: true });
+                        setHintSteps(solveResult.steps);
+                        setHintStepIndex(0);
+                    }}
+                >
+                    <Typography variant="h6">Hint</Typography>
+                </Button>
+            </Box>
+            <Button
                 color="primary" fullWidth={true} variant="contained" size="large"
                 onClick={() => {
                     const result = solve(originGrid);
-                    
+
                 }}
             >
                 <Typography variant="h6">Check result</Typography>

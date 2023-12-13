@@ -69,6 +69,7 @@ type SolveOptions = {
     showSteps?: boolean;
     randomBifurcation?: boolean;
     stopAtFirstDigit?: boolean;
+    skipPencilmarkStep?: boolean;
     techniquesBan?: TechniqueConfig;
 }
 export type SolveResult = {
@@ -221,7 +222,9 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
         return { removed: candidateRemoved, oldPMarks };
     }
 
-    addStep(() => ({ comment: 'Fill in pencil marks', grid, pMarks }));
+    if (!options.skipPencilmarkStep) {
+        addStep(() => ({ comment: 'Fill in pencil marks', grid, pMarks }));
+    }
 
     function applyTechniques() {
 
