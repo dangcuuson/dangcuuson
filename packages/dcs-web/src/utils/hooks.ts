@@ -142,3 +142,11 @@ export const useWindowSize = () => {
 
     return windowSize;
 };
+
+export const useForceUpdate = (): () => void => {
+    const [, setState] = React.useState(0);
+    return React.useCallback(
+        () => setState(prev => prev + 1),
+        [setState]
+    );
+};

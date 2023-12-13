@@ -6,11 +6,6 @@ export type CellHighlight = {
     row: number;
     col: number;
     color: 'red' | 'green';
-    pMark?: PencilMarkHighlight[];
-}
-type PencilMarkHighlight = {
-    value: number;
-    type: 'circle' | 'cross';
 }
 export type SolveStep = {
     grid: SudokuGrid;

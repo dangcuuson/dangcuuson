@@ -41,7 +41,7 @@ const useSudokuColorPalette = (): SudokuColorPalette => {
         userInputValue: mode === 'dark' ? blue.dark : blue.light,
 
         pencilMark: mode === 'dark' ? alpha(grey.light, 0.8) : grey.dark,
-        
+
         activeCellStroke: mode === 'dark' ? blue.dark : blue.light,
         activeCellFill: mode === 'dark' ? alpha(grey.dark, 0.5) : grey.light,
 
@@ -92,23 +92,25 @@ const SudokuPad: React.FC<Props> = ({ originGrid, currentStep, interactive }) =>
         const grid = currentStep ? currentStep.grid : originGrid;
         const flattenGrid = grid.flatMap(v => v);
 
-        return flattenGrid.map((val, index) => {
-            if (val === 0) {
-                return null;
-            }
-            const isOrigin = !!flattenOriginGrid[index];
-            const row = Math.floor(index / 9);
-            const col = index % 9;
-            return (
-                <text
-                    key={index}
-                    fill={!isOrigin ? sudokuColors.userInputValue : undefined}
-                    x={(col + 0.5) * cellSize}
-                    y={(row + 0.5) * cellSize}
-                    children={val}
-                />
-            )
-        }).filter(v => !!v);
+        return flattenGrid
+            .map((val, index) => {
+                if (val === 0) {
+                    return null;
+                }
+                const isOrigin = !!flattenOriginGrid[index];
+                const row = Math.floor(index / 9);
+                const col = index % 9;
+                return (
+                    <text
+                        key={index}
+                        fill={!isOrigin ? sudokuColors.userInputValue : undefined}
+                        x={(col + 0.5) * cellSize}
+                        y={(row + 0.5) * cellSize}
+                        children={val}
+                    />
+                )
+            })
+            .filter(v => !!v);
     }
     const drawHighlights = () => {
         const highlights = currentStep?.highlights || [];

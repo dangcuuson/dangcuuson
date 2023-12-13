@@ -4,7 +4,7 @@ import SudokuPadInteractive from '../../components/SudokuPad/SudokuPadInteractiv
 import { SolveResult, solve } from '../../components/SudokuPad/SudokuSolver';
 import _ from 'lodash';
 import SolveResultDisplay from './SolveResultDisplay';
-import { SudokuGrid } from '../../components/SudokuPad/SudokuTypes';
+import { PencilMark, SudokuGrid } from '../../components/SudokuPad/SudokuTypes';
 import GoBackIcon from '@mui/icons-material/KeyboardReturn';
 import { useNavigate } from 'react-router';
 import { useDerivedState } from '../../utils/hooks';
@@ -16,6 +16,10 @@ const SudokuSolverPage: React.FC<{}> = () => {
     });
     const [currentGrid, setCurrentGrid] = useDerivedState<SudokuGrid>(
         () => _.cloneDeep(originGrid),
+        [originGrid]
+    );
+    const [pencilMarks, setPencilMarks] = useDerivedState<PencilMark[]>(
+        () => [],
         [originGrid]
     );
     React.useEffect(
@@ -60,7 +64,13 @@ const SudokuSolverPage: React.FC<{}> = () => {
                     <Typography variant="h5" color="text.primary">
                         Fill the grid and click 'Solve'
                     </Typography>
-                    <SudokuPadInteractive originGrid={originGrid} currentGrid={currentGrid} setCurrentGrid={setCurrentGrid} />
+                    <SudokuPadInteractive
+                        originGrid={originGrid}
+                        currentGrid={currentGrid}
+                        setCurrentGrid={setCurrentGrid}
+                        pencilMarks={pencilMarks}
+                        setPencilMarks={setPencilMarks}
+                    />
                     <Button
                         variant="contained" color="primary" size="large"
                         onClick={() => {

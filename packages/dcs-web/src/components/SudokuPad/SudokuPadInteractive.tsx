@@ -1,20 +1,106 @@
 import React from 'react';
-import { GridPosition, SudokuGrid } from './SudokuTypes';
+import { GridPosition, PencilMark, SudokuGrid } from './SudokuTypes';
 import SudokuPad from './SudokuPad';
-import { Box, Button } from '@mui/material';
+import { Box, Button, useMediaQuery } from '@mui/material';
 import _ from 'lodash';
-import HiddenDetector from '../HiddenDetector/HiddenDetector';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
+import { calcBoxIndex } from './SudokuSolver';
 
 interface Props {
     originGrid: SudokuGrid;
     currentGrid: SudokuGrid;
     setCurrentGrid: React.Dispatch<React.SetStateAction<SudokuGrid>>;
-    pencilMarkMode?: boolean;
+    pencilMarks: PencilMark[];
+    setPencilMarks: React.Dispatch<React.SetStateAction<PencilMark[]>>;
 }
-const SudokuPadInteractive: React.FC<Props> = ({ originGrid, currentGrid, setCurrentGrid }) => {
+
+type Action = SetCellAction;
+type SetCellAction = {
+    type: 'set-cell';
+    digit: number;
+    row: number;
+    col: number;
+    pencilMarkValues: number[];
+}
+
+const SudokuPadInteractive: React.FC<Props> = ({ originGrid, currentGrid, setCurrentGrid, pencilMarks, setPencilMarks }) => {
     const [selectedCell, setSelectedCell] = React.useState<GridPosition | null>(null);
+    const isMobileView = useMediaQuery('(max-width:600px)');
+    const undoStack = React.useRef<{ action: Action; reverse: Action; }[]>([]);
+    const redoStack = React.useRef<{ action: Action; reverse: Action; }[]>([]);
+
+    React.useEffect(
+        () => {
+            undoStack.current = [];
+            redoStack.current = [];
+        },
+        [originGrid]
+    );
+
+    const performAction = (action: Action, source: 'user-input' | 'undo' | 'redo') => {
+        switch (action.type) {
+            case 'set-cell': {
+                const { row, col, digit, pencilMarkValues } = action;
+                if (source === 'user-input') {
+                    // check if the action result in visible change
+                    // if it does, add the action to undo stack
+                    const pMark = pencilMarks.find(p => p.row === row && p.col === col);
+                    const currentPMarkValues = pMark?.candidates || [];
+                    const currentDigit = currentGrid[row][col];
+                    const hasVisibleChange = () => {
+                        if (currentDigit !== digit) {
+                            return true;
+                        }
+                        return currentPMarkValues.length !== pencilMarkValues.length ||
+                            _.difference(currentPMarkValues, pencilMarkValues).length > 0;
+                    }
+                    if (hasVisibleChange()) {
+                        const reverse: Action = {
+                            type: 'set-cell',
+                            digit: currentDigit,
+                            pencilMarkValues: currentPMarkValues,
+                            row,
+                            col
+                        }
+                        undoStack.current.push({ action, reverse })
+                        redoStack.current = [];
+                    }
+                }
+
+                const newGrid = _.cloneDeep(currentGrid);
+                newGrid[row][col] = digit;
+                setCurrentGrid(newGrid);
+
+                const newPMarks = _.cloneDeep(pencilMarks)
+                    .filter(pMark => {
+                        return pMark.row !== row || pMark.col !== col;
+                    });
+                newPMarks.push({ row, col, box: calcBoxIndex(row, col), candidates: pencilMarkValues });
+
+                setPencilMarks(newPMarks);
+                break;
+            }
+        }
+    };
+
+    const undo = () => {
+        const lastAction = undoStack.current.pop();
+        if (lastAction) {
+            performAction(lastAction.reverse, 'undo');
+            redoStack.current.push(lastAction);
+        }
+
+    };
+
+    const redo = () => {
+        const lastAction = redoStack.current.pop();
+        if (lastAction) {
+            performAction(lastAction.action, 'redo');
+            undoStack.current.push(lastAction);
+        }
+    };
+
     React.useEffect(
         () => {
             if (!selectedCell) {
@@ -57,11 +143,13 @@ const SudokuPadInteractive: React.FC<Props> = ({ originGrid, currentGrid, setCur
                         if (!cellModifiable) {
                             break;
                         }
-                        setCurrentGrid(curGrid => {
-                            const newGrid = _.cloneDeep(curGrid);
-                            newGrid[row][col] = 0;
-                            return newGrid;
-                        });
+                        performAction({
+                            type: 'set-cell',
+                            row,
+                            col,
+                            digit: 0,
+                            pencilMarkValues: []
+                        }, 'user-input');
                         break;
                     }
                     case '1':
@@ -76,11 +164,14 @@ const SudokuPadInteractive: React.FC<Props> = ({ originGrid, currentGrid, setCur
                         if (!cellModifiable) {
                             break;
                         }
-                        setCurrentGrid(curGrid => {
-                            const newGrid = _.cloneDeep(curGrid);
-                            newGrid[row][col] = +e.key;
-                            return newGrid;
-                        });
+                        // TODO: check pencil mark mode
+                        performAction({
+                            type: 'set-cell',
+                            row,
+                            col,
+                            digit: +e.key,
+                            pencilMarkValues: []
+                        }, 'user-input');
                         break;
                     }
                 }
@@ -90,18 +181,11 @@ const SudokuPadInteractive: React.FC<Props> = ({ originGrid, currentGrid, setCur
                 window.removeEventListener('keydown', handleKeyDown);
             }
         },
-        [selectedCell, originGrid, setSelectedCell, setCurrentGrid]
+        [selectedCell, originGrid, currentGrid, pencilMarks]
     );
-    const [viewMode, setViewMode] = React.useState<'pc' | 'mobile'>('pc');
-
     return (
         <React.Fragment>
-            <HiddenDetector
-                smDown={true}
-                onHide={() => setViewMode('mobile')}
-                onVisible={() => setViewMode('pc')}
-            />
-            <Box display="flex">
+            <Box display="flex" flexDirection={!isMobileView ? 'row' : 'column'}>
                 <Box sx={{ cursor: 'pointer' }}>
                     <SudokuPad
                         interactive={{
@@ -115,7 +199,14 @@ const SudokuPadInteractive: React.FC<Props> = ({ originGrid, currentGrid, setCur
                     />
                 </Box>
                 <Box flex="1">
-                    <SudokuPadControls onDigitClicked={() => null} viewMode={viewMode} />
+                    <SudokuPadControls
+                        onDigitClicked={() => null}
+                        isMobileView={isMobileView}
+                        onUndo={() => undo()}
+                        onRedo={() => redo()}
+                        canUndo={undoStack.current.length > 0}
+                        canRedo={redoStack.current.length > 0}
+                    />
                 </Box>
             </Box>
         </React.Fragment>
@@ -124,17 +215,25 @@ const SudokuPadInteractive: React.FC<Props> = ({ originGrid, currentGrid, setCur
 
 interface ControlProps {
     onDigitClicked: (num: number) => void;
-    viewMode: 'pc' | 'mobile'
+    isMobileView: boolean;
+    canUndo: boolean;
+    canRedo: boolean;
+    onUndo: () => void;
+    onRedo: () => void;
 }
 
-const SudokuPadControls: React.FC<ControlProps> = (props) => {
+const SudokuPadControls: React.FC<ControlProps> = ({ onDigitClicked, isMobileView, onUndo, onRedo, canUndo, canRedo }) => {
     return (
         <Box display="flex" flexDirection="column" alignItems="center" width="100%" height="100%">
             <Box display="flex" alignItems="center">
                 <Button
                     size="large"
+                    disabled={!canUndo}
                     children={(
-                        <Box display="flex" flexDirection="column" alignItems="center">
+                        <Box
+                            display="flex" flexDirection="column" alignItems="center"
+                            onClick={() => onUndo()}
+                        >
                             <UndoIcon />
                             <span>Undo</span>
                         </Box>
@@ -142,25 +241,36 @@ const SudokuPadControls: React.FC<ControlProps> = (props) => {
                 />
                 <Button
                     size="large"
+                    disabled={!canRedo}
                     children={(
-                        <Box display="flex" flexDirection="column" alignItems="center">
+                        <Box
+                            display="flex" flexDirection="column" alignItems="center"
+                            onClick={() => onRedo()}
+                        >
                             <RedoIcon />
                             <span>Redo</span>
                         </Box>
                     )}
                 />
             </Box>
-            <Box display="grid" gridTemplateColumns="auto auto auto" >
+            <Box display={!isMobileView ? 'grid' : 'flex'} gridTemplateColumns="auto auto auto" flexWrap="wrap">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(digit => (
                     <Button
                         key={digit}
-                        size="large"
                         children={digit}
-                        style={{
-                            fontSize: '2rem'
+                        size="small"
+                        sx={{
+                            minWidth: {
+                                xs: 36,
+                                sm: 64
+                            },
+                            fontSize: {
+                                xs: '2rem',
+                                md: '2.5rem'
+                            }
                         }}
                         onClick={() => {
-                            props.onDigitClicked(digit);
+                            onDigitClicked(digit);
                         }}
                     />
                 ))}

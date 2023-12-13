@@ -7,7 +7,7 @@ class MultipleSolutionsFoundError extends Error {
     }
 }
 
-const calcBoxIndex = (row: number, col: number): number => {
+export const calcBoxIndex = (row: number, col: number): number => {
     return Math.floor(row / 3) * 3 + Math.floor(col / 3);
 }
 
@@ -287,10 +287,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                                 highlights: pMarksSet.pMarks.map(pMark => ({
                                     row: pMark.row,
                                     col: pMark.col,
-                                    color: pMark.row === row && pMark.col === col ? 'green' : 'red',
-                                    pMark: (pMark.row === row && pMark.col === col)
-                                        ? [{ type: 'circle', value: candidateValue }]
-                                        : undefined
+                                    color: pMark.row === row && pMark.col === col ? 'green' : 'red'
                                 }))
                             }));
 
