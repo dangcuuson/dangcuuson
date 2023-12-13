@@ -58,7 +58,7 @@ function buildPencilMarks(grid: SudokuGrid): PencilMark[] {
 type SolveOptions = {
     showSteps?: boolean;
 }
-type SolveResult = {
+export type SolveResult = {
     solution?: SudokuGrid;
     steps: SolveStep[];
     // in case a puzzle has more than one solution, it will output at least two examples here
@@ -113,15 +113,16 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
     function copyGrid(oldGrid: SudokuGrid) {
         return _.cloneDeep(oldGrid);
     }
-    function copyPMarks(oldPMarks: PencilMark[]) {
+    function copyPMarks(oldPMarks?: PencilMark[]) {
         return _.cloneDeep(oldPMarks);
     }
 
     const steps: SolveStep[] = [];
-    function addStep(step: SolveStep) {
+    function addStep(getStep: () => SolveStep) {
         if (!options.showSteps) {
             return;
         }
+        const step = getStep();
         steps.push({
             ...step,
             grid: copyGrid(step.grid),
@@ -192,6 +193,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                 if (location === 'box') {
                     return locIndex.includes(pMark.box);
                 }
+                return false;
             }
             if (checkLocation()) {
                 const removedCandidates = _.difference(pMark.candidates, digitsToRemove);
@@ -205,7 +207,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
         return { removed: candidateRemoved, oldPMarks };
     }
 
-    addStep({ comment: 'Fill in pencil marks', grid, pMarks });
+    addStep(() => ({ comment: 'Fill in pencil marks', grid, pMarks }));
 
     function applyTechniques() {
 
@@ -216,14 +218,14 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
             if (singleCandidates.length === 0) {
                 return false;
             }
-            addStep({
+            addStep(() => ({
                 comment: `Found single candidate(s)`,
                 grid,
                 pMarks,
                 highlights: singleCandidates.map(sc => ({
                     row: sc.row, col: sc.col, color: 'green'
                 }))
-            });
+            }));
             const placements = singleCandidates.map<DigitPlacement>(sc => ({
                 value: sc.candidates[0],
                 row: sc.row,
@@ -278,7 +280,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                         const setTest = pMarksSet.pMarks.filter(pMark => pMark.candidates.includes(candidateValue));
                         if (setTest.length === 1) {
                             const { row, col, box } = setTest[0];
-                            addStep({
+                            addStep(() => ({
                                 comment: `Where can ${candidateValue} be placed in ${printSetLocation(pMarksSet)}?`,
                                 grid,
                                 pMarks,
@@ -290,7 +292,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                                         ? [{ type: 'circle', value: candidateValue }]
                                         : undefined
                                 }))
-                            });
+                            }));
 
                             placeDigits([{ value: candidateValue, row, col, box }]);
                             return true;
@@ -345,7 +347,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                                     pMarksWhiteList: setTest
                                 });
                                 if (removed.length > 0) {
-                                    addStep({
+                                    addStep(() => ({
                                         comment: `Where can ${digit1} and ${digit2} be placed in ${printSetLocation(pMarksSet)}?`,
                                         grid,
                                         pMarks: oldPMarks,
@@ -361,7 +363,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                                                 color: 'red'
                                             }))
                                         ]
-                                    })
+                                    }))
                                     return true;
                                 }
                             }
@@ -421,7 +423,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                                 pMarksWhiteList: group
                             });
                             if (removed.length > 0) {
-                                addStep({
+                                addStep(() => ({
                                     comment: `Found common digits ${groupValues.join(',')} in ${printSetLocation(pMarksSet)}`,
                                     grid,
                                     pMarks: oldPMarks,
@@ -437,7 +439,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                                             color: 'red'
                                         }))
                                     ]
-                                })
+                                }))
                                 return true;
                             }
                         }
@@ -472,7 +474,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                             pMarksWhiteList: boxSet.pMarks
                         });
                         if (removed.length > 0) {
-                            addStep({
+                            addStep(() => ({
                                 comment: `In box ${i + 1}, digit ${digit} only appear in ${location} ${locIndex + 1}`,
                                 pMarks: oldPMarks,
                                 grid,
@@ -490,7 +492,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                                         color: 'red'
                                     }))
                                 ]
-                            })
+                            }))
                             return true;
                         }
                     }
@@ -571,7 +573,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                             });
 
                             if (removed.length > 0) {
-                                addStep({
+                                addStep(() => ({
                                     comment: `In box ${box1Index + 1} and box ${box2Index + 1}, digit ${digit} appears `
                                         + `in ${location} ${box1LocIndex[0]} and ${box1LocIndex[1]}. `
                                         + `Therefore we can elimiate ${digit} in those ${location}s in box ${config.targetBox + 1}`,
@@ -591,7 +593,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                                             color: 'red'
                                         }))
                                     ]
-                                })
+                                }))
                                 return true;
                             }
                         }
@@ -623,13 +625,13 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                     if (result.multipleSolutions) {
                         throw new MultipleSolutionsFoundError(result.multipleSolutions);
                     } else if (!result.solution) {
-                        addStep({
+                        addStep(() => ({
                             grid,
                             pMarks,
                             comment:
                                 `Using bifurcation, putting ${value} in row ${testPMark.row + 1}, column ${testPMark.col + 1} lead to an invalid solution.`,
                             highlights: [{ col: testPMark.col, row: testPMark.row, color: 'red' }]
-                        })
+                        }))
                         testPMark.candidates = testPMark.candidates.filter(v => v !== value);
                         return true;
                     } else {

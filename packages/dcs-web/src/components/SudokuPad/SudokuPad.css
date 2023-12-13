@@ -10,10 +10,6 @@
     dominant-baseline: central;
 }
 
-.sudoku-pad .pencil-marks text {
-    fill: grey;
-}
-
 .sudoku-pad .grid-values text {
     font-size: 3rem;
 }

@@ -88,11 +88,14 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
                     clearInterval(interval);
                 }
             }
+            return;
         },
         [isNightMode]
     )
 
-    const isWindowFocused = useIsWindowFocused();
+    let isWindowFocused = useIsWindowFocused();
+    // for now let music play even if window is not focused
+    isWindowFocused = true;
     return (
         <React.Fragment>
             <audio

@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React from 'react';
 
 // similar to use effect, the difference is that it won't
@@ -85,6 +86,9 @@ export function useInteractionTracker(tracking: boolean) {
     return count;
 }
 
+/**
+ * Derived state from another value (e.g props)
+ */
 type MapStateFn<TState> = (prevState: TState | null) => TState;
 export function useDerivedState<TState>(mapFn: MapStateFn<TState>, dependencies: any[]) {
     const [state, setState] = React.useState(() => mapFn(null));
@@ -93,6 +97,21 @@ export function useDerivedState<TState>(mapFn: MapStateFn<TState>, dependencies:
         dependencies
     );
     return [state, setState] as const;
+}
+
+// https://github.com/facebook/react/issues/16221
+// basically allow we to replace object reference with custom equals
+export function useCustomEqualIdentity<T>(value: T, customEquals: (x: T, y: T) => boolean): T {
+    const copy = React.useRef(value);
+    if (!customEquals(copy.current, value)) {
+        copy.current = value;
+    }
+    return copy.current;
+}
+
+// this hook makes sure object does not change identity if deep comparison of prev & cur value are the same
+export function useDeepEqualIdentity<T>(value: T): T {
+    return useCustomEqualIdentity(value, _.isEqual);
 }
 
 const getWindowSize = () => {

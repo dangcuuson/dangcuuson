@@ -1,14 +1,19 @@
 import React from 'react';
 import './SudokuPad.css';
-import { SolveStep, SudokuGrid } from './SudokuTypes';
+import { GridPosition, SolveStep, SudokuGrid } from './SudokuTypes';
 import { useTheme } from '@emotion/react';
-import { colors } from '@mui/material';
+import { alpha, colors } from '@mui/material';
 
 type SudokuColorPalette = {
-    black: string;
-    red: string;
-    green: string;
-    blue: string;
+    grid: string;
+    originalValue: string;
+    userInputValue: string;
+    pencilMark: string;
+    activeCellStroke: string;
+    activeCellFill: string;
+
+    hlRed: string;
+    hlGreen: string;
 }
 const useSudokuColorPalette = (): SudokuColorPalette => {
     const { palette } = useTheme();
@@ -31,19 +36,32 @@ const useSudokuColorPalette = (): SudokuColorPalette => {
     });
 
     return {
-        black: mode === 'dark' ? grey.dark : grey.contrastText,
-        red: mode === 'dark' ? red.dark : red.light,
-        green: mode === 'dark' ? green.dark : green.light,
-        blue: mode === 'dark' ? blue.dark : blue.light,
+        grid: mode === 'dark' ? grey.dark : grey.contrastText,
+        originalValue: mode === 'dark' ? grey.light : grey.contrastText,
+        userInputValue: mode === 'dark' ? blue.dark : blue.light,
+
+        pencilMark: mode === 'dark' ? alpha(grey.light, 0.5) : grey.dark,
+        
+        activeCellStroke: mode === 'dark' ? blue.dark : blue.light,
+        activeCellFill: mode === 'dark' ? alpha(grey.dark, 0.5) : grey.light,
+
+        hlRed: mode === 'dark' ? red.dark : red.light,
+        hlGreen: mode === 'dark' ? green.dark : green.light,
     }
+}
+
+type InteractiveProps = {
+    selectedCell: GridPosition | null;
+    setSelectedCell: React.Dispatch<React.SetStateAction<GridPosition>>
 }
 
 interface Props {
     originGrid: SudokuGrid;
     currentStep?: SolveStep;
+    interactive?: InteractiveProps;
 }
 
-const SudokuPad: React.FC<Props> = ({ originGrid, currentStep }) => {
+const SudokuPad: React.FC<Props> = ({ originGrid, currentStep, interactive }) => {
     const sudokuColors = useSudokuColorPalette();
 
     const cellSize = 64;
@@ -84,7 +102,7 @@ const SudokuPad: React.FC<Props> = ({ originGrid, currentStep }) => {
             return (
                 <text
                     key={index}
-                    fill={!isOrigin ? sudokuColors.blue : undefined}
+                    fill={!isOrigin ? sudokuColors.userInputValue : undefined}
                     x={(col + 0.5) * cellSize}
                     y={(row + 0.5) * cellSize}
                     children={val}
@@ -99,13 +117,10 @@ const SudokuPad: React.FC<Props> = ({ originGrid, currentStep }) => {
             const y = hl.row * cellSize;
             const getHlColor = () => {
                 if (hl.color === 'red') {
-                    return sudokuColors.red;
+                    return sudokuColors.hlRed;
                 }
                 if (hl.color === 'green') {
-                    return sudokuColors.green;
-                }
-                if (hl.color === 'blue') {
-                    return sudokuColors.blue;
+                    return sudokuColors.hlGreen;
                 }
                 return hl.color;
             }
@@ -125,7 +140,7 @@ const SudokuPad: React.FC<Props> = ({ originGrid, currentStep }) => {
             const xOrigin = pMark.col * cellSize;
             const yOrigin = pMark.row * cellSize;
             return (
-                <g key={index}>
+                <g key={index} fill={sudokuColors.pencilMark}>
                     {pMark.candidates.map(candidate => {
                         const xOffset = (0.5 + ((candidate - 1) % 3)) * (cellSize / 3);
                         const yOffset = (0.5 + Math.floor((candidate - 1) / 3)) * (cellSize / 3);
@@ -141,6 +156,46 @@ const SudokuPad: React.FC<Props> = ({ originGrid, currentStep }) => {
                 </g>
             )
         })
+    }
+
+    const drawInteractives = () => {
+        if (!interactive) {
+            return null;
+        }
+        const interactives: React.ReactNode[] = [];
+        // cell to listen to user input event
+        for (let row = 0; row < 9; row++) {
+            for (let col = 0; col < 9; col++) {
+                interactives.push(
+                    <rect
+                        key={`r${row}c${col}`}
+                        width={cellSize}
+                        height={cellSize}
+                        x={col * cellSize}
+                        y={row * cellSize}
+                        fill='rgba(0,0,0,0)'
+                        stroke='none'
+                        onMouseDown={() => interactive.setSelectedCell({ row, col })}
+                        onTouchStart={() => interactive.setSelectedCell({ row, col })}
+                    />
+                )
+            }
+        }
+        if (interactive.selectedCell) {
+            const { row, col } = interactive.selectedCell;
+            const x = col * cellSize;
+            const y = row * cellSize;
+            interactives.push(
+                <path
+                    key="selected-cell"
+                    d={`M${x} ${y} h${cellSize} v${cellSize} h${-cellSize} v${-cellSize}`}
+                    stroke={sudokuColors.activeCellStroke}
+                    strokeWidth="4"
+                    fill={sudokuColors.activeCellFill}
+                />
+            )
+        }
+        return interactives;
     }
     return (
         <svg
@@ -160,7 +215,7 @@ const SudokuPad: React.FC<Props> = ({ originGrid, currentStep }) => {
                     data-type="outer-grid"
                     d={getOuterGridCommand()}
                     fill="none"
-                    stroke={sudokuColors.black}
+                    stroke={sudokuColors.grid}
                     strokeWidth={3}
                     vectorEffect="non-scaling-stroke"
                 />
@@ -168,11 +223,14 @@ const SudokuPad: React.FC<Props> = ({ originGrid, currentStep }) => {
                     data-type="inner-grid"
                     d={getInnerGridCommand()}
                     fill="none"
-                    stroke={sudokuColors.black}
+                    stroke={sudokuColors.grid}
                     vectorEffect="non-scaling-stroke"
                 />
             </g>
-            <g className='grid-values' fill={sudokuColors.black}>
+            <g className='interactive'>
+                {drawInteractives()}
+            </g>
+            <g className='grid-values' fill={sudokuColors.originalValue}>
                 {drawGridValues()}
             </g>
         </svg>

@@ -4,7 +4,7 @@
     "allowJs": true,
     // module need to be "esnext" for code splitting to work
     // https://davidea.st/articles/webpack-typescript-code-split-wont-work
-    "module": "CommonJS",
+    "module": "ESNext",
     "esModuleInterop": true,
     "target": "es6",
     "lib": [
