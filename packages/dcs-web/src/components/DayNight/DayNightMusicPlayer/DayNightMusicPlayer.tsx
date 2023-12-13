@@ -59,6 +59,20 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
 
     React.useEffect(
         () => {
+            // if the song is cached in browser, it may be ready before
+            // onCanPlay callback is registered
+            if (dayAudioRef.current?.HAVE_ENOUGH_DATA) {
+                setDaySongLoaded(true);
+            }
+            if (nightAudioRef.current?.HAVE_ENOUGH_DATA) {
+                setNightSongLoaded(true);
+            }
+        },
+        []
+    )
+
+    React.useEffect(
+        () => {
             if (dayAudioRef.current && nightAudioRef.current) {
                 const dayAudio = dayAudioRef.current;
                 const nightAudio = nightAudioRef.current;
@@ -99,7 +113,7 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
     isWindowFocused = true;
     return (
         <Box position="relative">
-            {(!daySongLoaded || !nightSongLoaded) && (
+            {(!daySongLoaded || !nightSongLoaded) && !isMutedByUser && (
                 <CircularProgress style={{ position: 'absolute', left: 4, top: 4 }} />
             )}
             {!!daySongLoaded && nightSongLoaded && !!retryAutoplay && !isMutedByUser && (
