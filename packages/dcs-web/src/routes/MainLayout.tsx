@@ -36,7 +36,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
                             <NightModeToggle />
 
                         </Box>
-                        <Box padding={2}>
+                        <Box padding={2} width="100%" boxSizing="border-box">
                             {children}
                         </Box>
                     </MainContainer>

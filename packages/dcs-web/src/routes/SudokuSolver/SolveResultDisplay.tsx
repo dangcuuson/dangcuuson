@@ -41,8 +41,9 @@ const SolveResultDisplay: React.FC<Props> = ({ result, originGrid }) => {
     }
     if (!result.solution) {
         return (
-            <Box>
-                <Typography color="text.primary" variant="h4">{"Unable to get a solution :("}</Typography>
+            <Box textAlign="center">
+                <Typography color="text.primary" variant="h4">{"No solution found :("}</Typography>
+                <Typography color="text.secondary">Please make sure the puzzle is a valid Sudoku puzzle</Typography>
             </Box>
         )
     }

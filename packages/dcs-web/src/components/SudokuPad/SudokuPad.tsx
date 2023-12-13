@@ -40,7 +40,7 @@ const useSudokuColorPalette = (): SudokuColorPalette => {
         originalValue: mode === 'dark' ? grey.light : grey.contrastText,
         userInputValue: mode === 'dark' ? blue.dark : blue.light,
 
-        pencilMark: mode === 'dark' ? alpha(grey.light, 0.5) : grey.dark,
+        pencilMark: mode === 'dark' ? alpha(grey.light, 0.8) : grey.dark,
         
         activeCellStroke: mode === 'dark' ? blue.dark : blue.light,
         activeCellFill: mode === 'dark' ? alpha(grey.dark, 0.5) : grey.light,
@@ -227,11 +227,11 @@ const SudokuPad: React.FC<Props> = ({ originGrid, currentStep, interactive }) =>
                     vectorEffect="non-scaling-stroke"
                 />
             </g>
-            <g className='interactive'>
-                {drawInteractives()}
-            </g>
             <g className='grid-values' fill={sudokuColors.originalValue}>
                 {drawGridValues()}
+            </g>
+            <g className='interactive'>
+                {drawInteractives()}
             </g>
         </svg>
     )
