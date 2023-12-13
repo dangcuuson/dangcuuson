@@ -1,13 +1,17 @@
 import React from 'react';
 import { GridPosition, SudokuGrid } from './SudokuTypes';
 import SudokuPad from './SudokuPad';
-import { Box } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import _ from 'lodash';
+import HiddenDetector from '../HiddenDetector/HiddenDetector';
+import UndoIcon from '@mui/icons-material/Undo';
+import RedoIcon from '@mui/icons-material/Redo';
 
 interface Props {
     originGrid: SudokuGrid;
     currentGrid: SudokuGrid;
     setCurrentGrid: React.Dispatch<React.SetStateAction<SudokuGrid>>;
+    pencilMarkMode?: boolean;
 }
 const SudokuPadInteractive: React.FC<Props> = ({ originGrid, currentGrid, setCurrentGrid }) => {
     const [selectedCell, setSelectedCell] = React.useState<GridPosition | null>(null);
@@ -87,20 +91,80 @@ const SudokuPadInteractive: React.FC<Props> = ({ originGrid, currentGrid, setCur
             }
         },
         [selectedCell, originGrid, setSelectedCell, setCurrentGrid]
-    )
+    );
+    const [viewMode, setViewMode] = React.useState<'pc' | 'mobile'>('pc');
 
     return (
-        <Box sx={{ cursor: 'pointer' }}>
-            <SudokuPad
-                interactive={{
-                    selectedCell,
-                    setSelectedCell
-                }}
-                originGrid={originGrid}
-                currentStep={{
-                    grid: currentGrid
-                }}
+        <React.Fragment>
+            <HiddenDetector
+                smDown={true}
+                onHide={() => setViewMode('mobile')}
+                onVisible={() => setViewMode('pc')}
             />
+            <Box display="flex">
+                <Box sx={{ cursor: 'pointer' }}>
+                    <SudokuPad
+                        interactive={{
+                            selectedCell,
+                            setSelectedCell
+                        }}
+                        originGrid={originGrid}
+                        currentStep={{
+                            grid: currentGrid
+                        }}
+                    />
+                </Box>
+                <Box flex="1">
+                    <SudokuPadControls onDigitClicked={() => null} viewMode={viewMode} />
+                </Box>
+            </Box>
+        </React.Fragment>
+    );
+}
+
+interface ControlProps {
+    onDigitClicked: (num: number) => void;
+    viewMode: 'pc' | 'mobile'
+}
+
+const SudokuPadControls: React.FC<ControlProps> = (props) => {
+    return (
+        <Box display="flex" flexDirection="column" alignItems="center" width="100%" height="100%">
+            <Box display="flex" alignItems="center">
+                <Button
+                    size="large"
+                    children={(
+                        <Box display="flex" flexDirection="column" alignItems="center">
+                            <UndoIcon />
+                            <span>Undo</span>
+                        </Box>
+                    )}
+                />
+                <Button
+                    size="large"
+                    children={(
+                        <Box display="flex" flexDirection="column" alignItems="center">
+                            <RedoIcon />
+                            <span>Redo</span>
+                        </Box>
+                    )}
+                />
+            </Box>
+            <Box display="grid" gridTemplateColumns="auto auto auto" >
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(digit => (
+                    <Button
+                        key={digit}
+                        size="large"
+                        children={digit}
+                        style={{
+                            fontSize: '2rem'
+                        }}
+                        onClick={() => {
+                            props.onDigitClicked(digit);
+                        }}
+                    />
+                ))}
+            </Box>
         </Box>
     )
 }

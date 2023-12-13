@@ -7,12 +7,17 @@ import SolveResultDisplay from './SolveResultDisplay';
 import { SudokuGrid } from '../../components/SudokuPad/SudokuTypes';
 import GoBackIcon from '@mui/icons-material/KeyboardReturn';
 import { useNavigate } from 'react-router';
+import { useDerivedState } from '../../utils/hooks';
 
-const SudokuSolverPage: React.FC = () => {
+const SudokuSolverPage: React.FC<{}> = () => {
     const navigate = useNavigate();
-    const [originGrid, setOriginGrid] = React.useState(() => {
+    const [originGrid] = React.useState(() => {
         return Array(9).fill(0).map(row => Array(9).fill(0))
-    })
+    });
+    const [currentGrid, setCurrentGrid] = useDerivedState<SudokuGrid>(
+        () => _.cloneDeep(originGrid),
+        [originGrid]
+    );
     React.useEffect(
         () => {
             const handlePaste = (e: ClipboardEvent) => {
@@ -23,7 +28,7 @@ const SudokuSolverPage: React.FC = () => {
                         Array(9).fill(0).map((zero, row) => {
                             return numonly.slice(row * 9, row * 9 + 9).split('').map(digit => +digit);
                         });
-                    setOriginGrid(gridFromClipboard);
+                    setCurrentGrid(gridFromClipboard);
                 }
             }
             window.addEventListener('paste', handlePaste);
@@ -35,7 +40,7 @@ const SudokuSolverPage: React.FC = () => {
     )
     const [solveResult, setSolveResult] = React.useState<SolveResult | null>(null);
     return (
-        <Box display="flex" flexDirection="column" alignItems="center">
+        <Box id="solve-page" textAlign="center" width="100%">
             <Box display="flex" justifyContent="flex-end" width="100%">
                 <Button
                     variant="text"
@@ -55,18 +60,18 @@ const SudokuSolverPage: React.FC = () => {
                     <Typography variant="h5" color="text.primary">
                         Fill the grid and click 'Solve'
                     </Typography>
-                    <SudokuPadInteractive originGrid={originGrid} currentGrid={originGrid} setCurrentGrid={setOriginGrid} />
+                    <SudokuPadInteractive originGrid={originGrid} currentGrid={currentGrid} setCurrentGrid={setCurrentGrid} />
                     <Button
                         variant="contained" color="primary" size="large"
                         onClick={() => {
-                            setSolveResult(solve(originGrid, { showSteps: true }));
+                            setSolveResult(solve(currentGrid, { showSteps: true }));
                         }}
                     >
                         <Typography variant="h4">Solve</Typography>
                     </Button>
                 </React.Fragment>
             )}
-            {!!solveResult && <SolveResultDisplay originGrid={originGrid} result={solveResult} />}
+            {!!solveResult && <SolveResultDisplay originGrid={currentGrid} result={solveResult} />}
         </Box>
     )
 }
