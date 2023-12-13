@@ -6,7 +6,7 @@ import { SudokuGrid } from './SudokuTypes';
  * @param difficulty: higher = more difficult
  * @returns 
  */
-export const generateGrid = (difficulty: 0 | 1 | 2 | 3 | 4): SudokuGrid => {
+export const generateGrid = (difficulty: number): SudokuGrid => {
     const emptyGrid: SudokuGrid = Array(9).fill(0).map(row => Array(9).fill(0));
     const { multipleSolutions } = solve(emptyGrid);
 
@@ -19,7 +19,7 @@ export const generateGrid = (difficulty: 0 | 1 | 2 | 3 | 4): SudokuGrid => {
     // If removing cell result in multiple solution, we put the cell back
     // and reduce attempt
     // the higher the attempt, the more difficult the puzzle will be
-    let attempts = [10, 20, 35, 40, 50][difficulty] || 6;
+    let attempts = [10, 20, 35, 40, 50][difficulty] || 10;
     const availableCellIndexes: number[] = _.shuffle(Array(81).fill(0).map((v, index) => index));
     while (attempts > 0 && availableCellIndexes.length > 0) {
         // Select a random cell that was not selected
@@ -31,10 +31,18 @@ export const generateGrid = (difficulty: 0 | 1 | 2 | 3 | 4): SudokuGrid => {
         // Remember its cell value in case we need to put it back
         const backup = randomGrid[row][col];
         randomGrid[row][col] = 0;
-        const solveResult = solve(randomGrid);
+        const solveResult = solve(randomGrid, {
+            // for lower difficult, do not generate one that can only be solved
+            // with these high level techniques
+            techniquesBan: {
+                bifurcation: difficulty < 3,
+                hiddenTwins: difficulty < 3,
+                rowColClaim: difficulty < 2
+            }
+        });
 
         // found multiple solutions. Put the value back
-        if (solveResult.multipleSolutions) {
+        if (solveResult.multipleSolutions || !solveResult.solution) {
             randomGrid[row][col] = backup;
             attempts--;
         }

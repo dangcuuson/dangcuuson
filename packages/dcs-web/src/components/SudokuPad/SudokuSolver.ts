@@ -55,9 +55,21 @@ function buildPencilMarks(grid: SudokuGrid): PencilMark[] {
     return pMarks;
 }
 
+type TechniqueConfig = {
+    onlyCandidate?: boolean;
+    loner?: boolean;
+    nakedGroups?: boolean;
+    hiddenTwins?: boolean;
+    boxClaim?: boolean;
+    rowColClaim?: boolean;
+    bifurcation?: boolean;
+}
+
 type SolveOptions = {
     showSteps?: boolean;
     randomBifurcation?: boolean;
+    stopAtFirstDigit?: boolean;
+    techniquesBan?: TechniqueConfig;
 }
 export type SolveResult = {
     solution?: SudokuGrid;
@@ -133,7 +145,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
 
     const grid = copyGrid(_grid);
     let pMarks = buildPencilMarks(grid);
-
+    let digitPlaced = false;
     type DigitPlacement = {
         value: number;
         row: number;
@@ -142,6 +154,7 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
     }
     // place digits into grid and update pencil makrs
     function placeDigits(placements: DigitPlacement[]) {
+        digitPlaced = true;
         for (const { value, col, row, box } of placements) {
             grid[row][col] = value;
             pMarks = pMarks
@@ -653,7 +666,6 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
             return false;
         }
 
-
         let updated = false;
         do {
             const techniques = [
@@ -664,12 +676,38 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                 boxClaim,
                 rowColClaim,
                 bifurcation
-            ];
+            ].filter(technique => {
+                if (options.techniquesBan?.onlyCandidate && technique === onlyCandidate) {
+                    return false;
+                }
+                if (options.techniquesBan?.loner && technique === loner) {
+                    return false;
+                }
+                if (options.techniquesBan?.nakedGroups && technique === nakedGroups) {
+                    return false;
+                }
+                if (options.techniquesBan?.hiddenTwins && technique === hiddenTwins) {
+                    return false;
+                }
+                if (options.techniquesBan?.boxClaim && technique === boxClaim) {
+                    return false;
+                }
+                if (options.techniquesBan?.rowColClaim && technique === rowColClaim) {
+                    return false;
+                }
+                if (options.techniquesBan?.bifurcation && technique === bifurcation) {
+                    return false;
+                }
+                return true;
+            });
             for (const technique of techniques) {
                 updated = technique();
                 if (updated) {
                     break;
                 }
+            }
+            if (options.stopAtFirstDigit && digitPlaced) {
+                break;
             }
         } while (updated)
     }
