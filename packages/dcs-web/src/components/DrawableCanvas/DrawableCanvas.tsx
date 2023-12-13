@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 import { fabric } from 'fabric';
 
 const initFabricCanvas = (el: HTMLCanvasElement): fabric.Canvas => {

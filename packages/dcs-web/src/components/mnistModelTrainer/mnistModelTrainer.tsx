@@ -1,6 +1,6 @@
 import React from 'react';
 import * as tf from '@tensorflow/tfjs';
-import * as tfvis from '@tensorflow/tfjs-vis';
+// import * as tfvis from '@tensorflow/tfjs-vis';
 import { loadMnistData } from './mninstImgLoader';
 import DrawableCanvas from '../DrawableCanvas/DrawableCanvas';
 
@@ -66,10 +66,10 @@ function getModel() {
 }
 
 async function trainModel(model: tf.Sequential, data, onTrainEnd: () => void) {
-    const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
-    const container = {
-        name: 'Model Training', tab: 'Model', styles: { height: '1000px' }
-    };
+    // const metrics = ['loss', 'val_loss', 'acc', 'val_acc'];
+    // const container = {
+    //     name: 'Model Training', tab: 'Model', styles: { height: '1000px' }
+    // };
     // const fitCallbacks = tfvis.show.fitCallbacks(container, metrics);
 
     const BATCH_SIZE = 512;
