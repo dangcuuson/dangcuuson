@@ -3,24 +3,19 @@ import SudokuPad from '../../components/SudokuPad/SudokuPad';
 import React from 'react';
 import { useNavigate } from 'react-router';
 import { routeConfigs } from '../routeConfig';
+import { generateGrid } from '../../components/SudokuPad/SudokuGenerator';
 
 const HomePage: React.FC<{}> = () => {
     const navigate = useNavigate();
+    const randomGrid = React.useMemo(
+        () => {
+            return generateGrid(4);
+        },
+        []
+    )
     return (
         <Box width="100%" display="flex" flexDirection="column" alignItems="center">
-            <SudokuPad
-                originGrid={[
-                    [7, 5, 0, 0, 1, 0, 0, 0, 0],
-                    [0, 0, 4, 0, 9, 5, 0, 6, 0],
-                    [0, 0, 0, 8, 0, 7, 0, 0, 4],
-                    [4, 0, 0, 0, 0, 3, 0, 0, 7],
-                    [0, 2, 0, 0, 0, 0, 0, 1, 0],
-                    [6, 0, 0, 5, 2, 0, 0, 0, 3],
-                    [0, 0, 0, 4, 0, 6, 0, 0, 0],
-                    [0, 7, 0, 9, 5, 0, 4, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0, 2, 6]
-                ]}
-            />
+            <SudokuPad originGrid={randomGrid} />
             <Box marginBottom={2} width="100%">
                 <Button
                     variant="contained" color="primary" fullWidth={true} size="large"
