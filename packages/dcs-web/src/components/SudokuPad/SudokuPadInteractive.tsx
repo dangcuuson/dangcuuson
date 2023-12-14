@@ -74,9 +74,7 @@ interface ControlProps extends Props {
 const SudokuPadControls: React.FC<ControlProps> = (props) => {
     const undoStack = React.useRef<{ action: Action; reverse: Action; }[]>([]);
     const redoStack = React.useRef<{ action: Action; reverse: Action; }[]>([]);
-    const [_pencilMode, setPencilMode] = React.useState(false);
-    const [isShift, setIsShift] = React.useState(false);
-    const pencilMode = isShift ? !_pencilMode : _pencilMode;
+    const [pencilMode, setPencilMode] = React.useState(false);
 
     React.useEffect(
         () => {
@@ -269,21 +267,14 @@ const SudokuPadControls: React.FC<ControlProps> = (props) => {
 
     React.useEffect(
         () => {
-            const shiftKeyDownCheck = (e: KeyboardEvent) => {
-                if (e.key === 'Shift') {
-                    setIsShift(true);
+            const spaceKeyCheck = (e: KeyboardEvent) => {
+                if (e.key === ' ') {
+                    setPencilMode(p => !p)
                 }
             };
-            const shiftKeyUpCheck = (e: KeyboardEvent) => {
-                if (e.key === 'Shift') {
-                    setIsShift(false);
-                }
-            };
-            window.addEventListener('keydown', shiftKeyDownCheck);
-            window.addEventListener('keyup', shiftKeyUpCheck);
+            window.addEventListener('keypress', spaceKeyCheck);
             return () => {
-                window.addEventListener('keydown', shiftKeyDownCheck);
-                window.addEventListener('keyup', shiftKeyUpCheck);
+                window.removeEventListener('keypress', spaceKeyCheck);
             }
         },
         []
