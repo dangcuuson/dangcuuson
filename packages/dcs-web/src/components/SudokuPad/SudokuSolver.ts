@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { CellHighlight, PencilMark, SolveStep, SudokuGrid } from './SudokuTypes';
+import { CellHighlight, GridPosition, PencilMark, SolveStep, SudokuGrid } from './SudokuTypes';
 
 class MultipleSolutionsFoundError extends Error {
     constructor(public solutions: SudokuGrid[]) {
@@ -297,16 +297,36 @@ function _solve(_grid: SudokuGrid, options: SolveOptions = {}): SolveResult {
                         const setTest = pMarksSet.pMarks.filter(pMark => pMark.candidates.includes(candidateValue));
                         if (setTest.length === 1) {
                             const { row, col, box } = setTest[0];
-                            addStep(() => ({
-                                comment: `Where can ${candidateValue} be placed in ${printSetLocation(pMarksSet)}?`,
-                                grid,
-                                pMarks,
-                                highlights: pMarksSet.pMarks.map(pMark => ({
-                                    row: pMark.row,
-                                    col: pMark.col,
-                                    color: pMark.row === row && pMark.col === col ? 'green' : 'red'
-                                }))
-                            }));
+                            addStep(() => {
+                                const getExistingDigitsLoc = (): GridPosition[] => {
+                                    const pos: GridPosition[] = [];
+                                    for (let row = 0; row < 9; row++) {
+                                        for (let col = 0; col < 9; col++) {
+                                            if (grid[row][col] === candidateValue) {
+                                                pos.push({ row, col });
+                                            }
+                                        }
+                                    }
+                                    return pos;
+                                }
+                                return {
+                                    comment: `Where can ${candidateValue} be placed in ${printSetLocation(pMarksSet)}?`,
+                                    grid,
+                                    pMarks,
+                                    highlights: [
+                                        ...pMarksSet.pMarks.map<CellHighlight>(pMark => ({
+                                            row: pMark.row,
+                                            col: pMark.col,
+                                            color: pMark.row === row && pMark.col === col ? 'green' : 'red'
+                                        })),
+                                        ...getExistingDigitsLoc().map<CellHighlight>(pos => ({
+                                            row: pos.row,
+                                            col: pos.col,
+                                            color: 'green'
+                                        }))
+                                    ]
+                                }
+                            });
 
                             placeDigits([{ value: candidateValue, row, col, box }]);
                             return true;
