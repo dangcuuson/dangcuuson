@@ -22,10 +22,11 @@ jobs:
         cache: 'npm'
 
     - name: Install
-      uses: borales/actions-yarn@v4
-      with:
-        cmd: install # will run `yarn install` command
+      run: yarn install
           
-    - run: yarn typecheck-all
-    - run: cd ./packages/dcs-web
-    - run: yarn build
+    - name: Type check
+      run: yarn typecheck-all
+
+    - name: Build web
+      run: yarn build
+      working-directory: ./packages/dcs-web
