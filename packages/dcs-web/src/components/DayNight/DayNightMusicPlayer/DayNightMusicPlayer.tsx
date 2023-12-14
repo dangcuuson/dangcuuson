@@ -69,7 +69,7 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
             }
         },
         []
-    )
+    );
 
     React.useEffect(
         () => {
@@ -82,18 +82,29 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
                 } else {
                     nightAudio.currentTime = dayAudio.currentTime;
                 }
+                let count = 0;
                 const interval = setInterval(
                     () => {
-                        const dayValChange = isNightMode ? -0.1 : 0.1;
-                        const nightValChange = -dayValChange;
+                        count++;
+                        const dayVolume = isNightMode ? (1 - count * 0.1) : count * 0.1;
+                        const nightVolume = 1 - dayVolume;
 
-                        dayAudio.volume = _.clamp(dayAudio.volume + dayValChange, 0, 1);
-                        nightAudio.volume = _.clamp(nightAudio.volume + nightValChange, 0, 1);
+                        // ios browser does not allow programmatically control volume (volume can't be to a number between 0 and 1)
+                        // (volume will be reset back to 1)
+                        if (count > 1 && dayAudio.volume === 1 && nightAudio.volume === 1) {
+                            dayAudio.muted = isNightMode;
+                            dayAudio.volume = isNightMode ? 0 : 1;
+                            nightAudio.muted = !isNightMode;
+                            nightAudio.volume = !isNightMode ? 0 : 1;
+                            clearInterval(interval);
+                            return;
+                        }
+
+                        dayAudio.volume = dayVolume;
+                        nightAudio.volume = nightVolume;
 
                         // transistion done => clear interval
-                        if ((dayAudio.volume === 0 || dayAudio.volume === 1) && (
-                            nightAudio.volume === 0 || nightAudio.volume === 1
-                        )) {
+                        if (count === 10) {
                             clearInterval(interval);
                         }
                     },
