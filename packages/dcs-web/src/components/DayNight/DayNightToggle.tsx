@@ -59,6 +59,7 @@ const DayNightToggle: React.FC<Props> = () => {
     const { isNightMode, setIsNightMode } = React.useContext(DayNightContext);
     return (
         <FormControlLabel
+            aria-label={"Toggle day/night mode"}
             control={<DayNightSwitch sx={{ m: 1 }} />}
             label=""
             checked={isNightMode}

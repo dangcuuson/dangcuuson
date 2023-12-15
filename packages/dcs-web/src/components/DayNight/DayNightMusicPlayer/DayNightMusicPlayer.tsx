@@ -125,10 +125,10 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
     return (
         <Box position="relative">
             {(!daySongLoaded || !nightSongLoaded) && !isMutedByUser && (
-                <CircularProgress style={{ position: 'absolute', left: 4, top: 4 }} />
+                <CircularProgress aria-label="Music is loading" style={{ position: 'absolute', left: 4, top: 4 }} />
             )}
             {!!daySongLoaded && nightSongLoaded && !!retryAutoplay && !isMutedByUser && (
-                <CircularProgress variant="determinate" value={100} color="error" style={{ position: 'absolute', left: 4, top: 4 }} />
+                <CircularProgress aria-label="Require interaction to play music" variant="determinate" value={100} color="error" style={{ position: 'absolute', left: 4, top: 4 }} />
             )}
             <audio
                 ref={dayAudioRef}
@@ -150,6 +150,7 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
                 size="large"
                 children={isMutedByUser ? <MusicOffIcon /> : <MusicIcon />}
                 onClickCapture={() => setIsMutedByUser(!isMutedByUser)}
+                aria-label={"Toggle background music"}
             />
         </Box>
     )

@@ -30,6 +30,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
                             <IconButton
                                 size="large"
                                 onClick={() => navigate(routeConfigs.home.get())}
+                                aria-label="Home page"
                                 children={<HomeIcon />}
                             />
                             <DayNightMusicPlayer />
