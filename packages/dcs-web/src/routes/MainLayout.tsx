@@ -36,9 +36,11 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
                             <NightModeToggle />
 
                         </Box>
-                        <Box padding={2} width="100%" boxSizing="border-box">
-                            {children}
-                        </Box>
+                        <React.Suspense fallback="Loading...">
+                            <Box padding={2} width="100%" boxSizing="border-box">
+                                {children}
+                            </Box>
+                        </React.Suspense>
                     </MainContainer>
                 </DightNightBackground>
             </React.Suspense>

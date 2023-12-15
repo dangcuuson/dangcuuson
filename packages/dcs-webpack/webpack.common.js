@@ -40,7 +40,7 @@ const commonRules = [
         use: ['style-loader', 'css-loader'],
     },
     {
-        test: /\.(png|svg|jpg|jpeg|gif|ico|mp3)$/i,
+        test: /\.(png|svg|jpg|jpeg|gif|ico|mp3|webp)$/i,
         type: 'asset/resource',
     },
     {
