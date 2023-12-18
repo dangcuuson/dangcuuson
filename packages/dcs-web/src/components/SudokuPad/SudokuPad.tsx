@@ -1,8 +1,7 @@
 import React from 'react';
-import './SudokuPad.css';
 import { GridPosition, SolveStep, SudokuGrid } from './SudokuTypes';
 import { useTheme } from '@emotion/react';
-import { alpha, colors } from '@mui/material';
+import { alpha, colors, styled } from '@mui/material';
 
 type SudokuColorPalette = {
     grid: string;
@@ -60,6 +59,20 @@ interface Props {
     currentStep?: SolveStep;
     interactive?: InteractiveProps;
 }
+
+const SudokuPadSVG = styled('svg')(({ theme }) => ({
+    width: '100%',
+    height: '100%',
+    maxWidth: theme.breakpoints.values.sm,
+    maxHeight: theme.breakpoints.values.sm,
+    '& text': {
+        textAnchor: 'middle',
+        dominantBaseline: 'central'
+    },
+    '& .grid-values text': {
+        fontSize: '3rem'
+    }
+}))
 
 const SudokuPad: React.FC<Props> = ({ originGrid, currentStep, interactive }) => {
     const sudokuColors = useSudokuColorPalette();
@@ -200,7 +213,7 @@ const SudokuPad: React.FC<Props> = ({ originGrid, currentStep, interactive }) =>
         return interactives;
     }
     return (
-        <svg
+        <SudokuPadSVG
             className="sudoku-pad"
             width={svgSize}
             height={svgSize}
@@ -235,7 +248,7 @@ const SudokuPad: React.FC<Props> = ({ originGrid, currentStep, interactive }) =>
             <g className='interactive'>
                 {drawInteractives()}
             </g>
-        </svg>
+        </SudokuPadSVG>
     )
 }
 
