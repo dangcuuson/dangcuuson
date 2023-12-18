@@ -16,7 +16,10 @@ const MainContainer = styled('div')(({ theme }) => ({
     minHeight: '100vh',
     width: '100%',
     maxWidth: '960px',
-    overflow: 'auto'
+    overflow: 'auto',
+    '& *': {
+        boxSizing: 'border-box'
+    }
 }));
 
 const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
@@ -25,7 +28,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
         <ErrorBoundary>
             <React.Suspense fallback="Loading...">
                 <DightNightBackground>
-                    <MainContainer>
+                    <MainContainer id="main-container">
                         <Box display="flex" flexGrow={1} justifyContent="flex-start">
                             <IconButton
                                 size="large"
@@ -38,7 +41,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
 
                         </Box>
                         <React.Suspense fallback="Loading...">
-                            <Box padding={2} width="100%" boxSizing="border-box">
+                            <Box padding={2} width="100%">
                                 {children}
                             </Box>
                         </React.Suspense>
