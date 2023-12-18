@@ -1,7 +1,6 @@
 import React from 'react';
 import ErrorBoundary from '../components/ErrorBoundary/ErrorBoundary';
-import { Box, IconButton, alpha } from '@mui/material';
-import styled from '@emotion/styled';
+import { Box, IconButton, alpha, styled } from '@mui/material';
 import NightModeToggle from '../components/DayNight/DayNightToggle';
 import DightNightBackground from '../components/DayNight/DayNightBackground/DayNightBackground';
 import DayNightMusicPlayer from '../components/DayNight/DayNightMusicPlayer/DayNightMusicPlayer';
