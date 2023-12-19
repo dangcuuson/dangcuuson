@@ -1,6 +1,6 @@
 import React from 'react';
 import { ThemeProvider, createTheme, useMediaQuery } from '@mui/material';
-import { useDerivedState, useLocalStorage } from '../../utils/hooks';
+import { useLocalStorage } from '../../utils/hooks';
 
 type DayNightContextType = {
     isNightMode: boolean
@@ -12,6 +12,13 @@ export const DayNightContext = React.createContext<DayNightContextType>({
     setIsNightMode: () => null
 });
 
+const dayTheme = createTheme({
+    palette: { mode: 'light' }
+});
+
+const nightTheme = createTheme({
+    palette: { mode: 'dark' }
+});
 
 export const DayNightThemeProvider: React.FC<{ children: React.ReactNode; }> = (props) => {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -26,16 +33,10 @@ export const DayNightThemeProvider: React.FC<{ children: React.ReactNode; }> = (
         }
     });
 
-    const [theme] = useDerivedState(
-        () => {
-            return createTheme({
-                palette: {
-                    mode: isNightMode ? 'dark' : 'light'
-                }
-            });
-        },
+    const theme = React.useMemo(
+        () => isNightMode ? nightTheme : dayTheme,
         [isNightMode]
-    )
+    );
     return (
         <DayNightContext.Provider
             value={{
