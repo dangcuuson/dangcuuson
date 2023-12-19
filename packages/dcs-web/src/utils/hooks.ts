@@ -91,12 +91,28 @@ export function useInteractionTracker(tracking: boolean) {
  */
 type MapStateFn<TState> = (prevState: TState | null) => TState;
 export function useDerivedState<TState>(mapFn: MapStateFn<TState>, dependencies: any[]) {
-    const [state, setState] = React.useState(() => mapFn(null));
+    const [_value, _setValue] = React.useState(() => mapFn(null));
+    const derivedValueRef = React.useRef<TState | null>(null);
+
+    const currentValue = derivedValueRef.current ?? _value;
+
+    const setState = React.useCallback<typeof _setValue>(
+        (action: React.SetStateAction<TState>) => {
+            derivedValueRef.current = null;
+            return _setValue(action);
+        },
+        [_setValue]
+    )
     useDidUpdate(
-        () => setState(prev => mapFn(prev)),
+        () => {
+            // to avoid double re-render, we will just calculate derived state but don't set it via setState
+            // we will store the new state inside a ref instead
+            derivedValueRef.current = mapFn(currentValue);
+            // when setState happens we will unset this ref so that it will use the underlying state
+        },
         dependencies
     );
-    return [state, setState] as const;
+    return [currentValue, setState] as const;
 }
 
 // https://github.com/facebook/react/issues/16221
