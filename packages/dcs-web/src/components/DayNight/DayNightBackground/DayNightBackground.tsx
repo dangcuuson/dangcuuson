@@ -1,16 +1,16 @@
 import { Box } from '@mui/material';
 import React from 'react';
-import { DayNightContext } from '../DayNightContext';
+import { useIsDarkMode } from '../DayNightStore';
 
 const DayBG = require('./DayBackground.webp');
 const NightBG = require('./NightBackground.webp');
 const DightNightBackground: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
-    const { isNightMode } = React.useContext(DayNightContext);
+    const isDarkMode = useIsDarkMode();
     return (
         <Box
             bgcolor="background.paper"
             sx={{
-                backgroundImage: `url(${isNightMode ? NightBG : DayBG})`,
+                backgroundImage: `url(${isDarkMode ? NightBG : DayBG})`,
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
                 backgroundAttachment: 'fixed',

@@ -1,6 +1,6 @@
 import React from 'react';
 import MainLayout from './routes/MainLayout';
-import { DayNightThemeProvider } from './components/DayNight/DayNightContext';
+import DayNightThemeProvider from './components/DayNight/DayNightThemeProvider';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { RouteItemConfig, routeConfigs } from './routes/routeConfig';
 import _ from 'lodash';

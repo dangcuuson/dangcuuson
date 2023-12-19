@@ -1,17 +1,17 @@
 import React from 'react';
-import { DayNightContext } from '../DayNightContext';
 import _ from 'lodash';
 import MusicIcon from '@mui/icons-material/MusicNote';
 import MusicOffIcon from '@mui/icons-material/MusicOff';
 import { Box, IconButton } from '@mui/material';
 import { useInteractionTracker, useIsWindowFocused, useLocalStorage } from '../../../utils/hooks';
 import { CircularProgress } from '@mui/material';
+import { useIsDarkMode } from '../DayNightStore';
 
 const DaySong = require('./DaySong.mp3');
 const NightSong = require('./NightSong.mp3');
 
 const DayNightMusicPlayer: React.FC<{}> = () => {
-    const { isNightMode } = React.useContext(DayNightContext);
+    const isDarkMode = useIsDarkMode();
     const [isMutedByUser, setIsMutedByUser] = useLocalStorage<boolean>({
         key: 'is_muted',
         getInitValue: v => v === 'true'
@@ -76,7 +76,7 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
             if (dayAudioRef.current && nightAudioRef.current) {
                 const dayAudio = dayAudioRef.current;
                 const nightAudio = nightAudioRef.current;
-                if (!isNightMode) {
+                if (!isDarkMode) {
                     // phasing to day => sync dayAuto to nightAuto
                     dayAudio.currentTime = nightAudio.currentTime;
                 } else {
@@ -86,16 +86,16 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
                 const interval = setInterval(
                     () => {
                         count++;
-                        const dayVolume = isNightMode ? (1 - count * 0.1) : count * 0.1;
+                        const dayVolume = isDarkMode ? (1 - count * 0.1) : count * 0.1;
                         const nightVolume = 1 - dayVolume;
 
                         // ios browser does not allow programmatically control volume (volume can't be to a number between 0 and 1)
                         // (volume will be reset back to 1)
                         if (count > 1 && dayAudio.volume === 1 && nightAudio.volume === 1) {
-                            dayAudio.muted = isNightMode;
-                            dayAudio.volume = isNightMode ? 0 : 1;
-                            nightAudio.muted = !isNightMode;
-                            nightAudio.volume = !isNightMode ? 0 : 1;
+                            dayAudio.muted = isDarkMode;
+                            dayAudio.volume = isDarkMode ? 0 : 1;
+                            nightAudio.muted = !isDarkMode;
+                            nightAudio.volume = !isDarkMode ? 0 : 1;
                             clearInterval(interval);
                             return;
                         }
@@ -116,7 +116,7 @@ const DayNightMusicPlayer: React.FC<{}> = () => {
             }
             return;
         },
-        [isNightMode]
+        [isDarkMode]
     )
 
     let isWindowFocused = useIsWindowFocused();

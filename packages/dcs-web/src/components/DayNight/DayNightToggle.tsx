@@ -1,7 +1,7 @@
 import React from 'react';
-import { DayNightContext } from './DayNightContext';
 import styled from '@emotion/styled';
 import { FormControlLabel, Switch } from '@mui/material';
+import { useIsDarkMode, useSetDarkMode } from './DayNightStore';
 
 // copied from https://mui.com/material-ui/react-switch/
 const DayNightSwitch = styled(Switch)(({ theme }) => {
@@ -56,14 +56,15 @@ const DayNightSwitch = styled(Switch)(({ theme }) => {
 interface Props {
 }
 const DayNightToggle: React.FC<Props> = () => {
-    const { isNightMode, setIsNightMode } = React.useContext(DayNightContext);
+    const isDarkMode = useIsDarkMode();
+    const setDarkMode = useSetDarkMode();
     return (
         <FormControlLabel
             aria-label={"Toggle day/night mode"}
             control={<DayNightSwitch sx={{ m: 1 }} />}
             label=""
-            checked={isNightMode}
-            onChange={(e, checked) => setIsNightMode(checked)}
+            checked={isDarkMode}
+            onChange={(e, checked) => setDarkMode(checked)}
         />
     );
 }
